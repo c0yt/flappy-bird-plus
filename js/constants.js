@@ -71,7 +71,7 @@ const GAME_STATE = {
     DIFFICULTY_SELECT: 'DIFFICULTY_SELECT',
     PLAYING: 'PLAYING',
     GAME_OVER: 'GAME_OVER',
-    PAUSED: 'PAUSED' // Optional, if pause functionality is added
+    PAUSED: 'PAUSED'
 };
 
 // Asset paths (placeholders, update with actual paths/names)

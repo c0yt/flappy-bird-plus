@@ -1,19 +1,20 @@
 // js/game.js
 
-class Game {
-    constructor(canvasId) {
+class Game {    constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.canvas.width = CANVAS_WIDTH;
         this.canvas.height = CANVAS_HEIGHT;
 
-        this.ui = new UI(this);
         this.gameState = GAME_STATE.MENU;
         this.currentDifficultySettings = null;
         this.bird = null;
         this.pipes = [];
         this.coins = [];  // 保留金币数组
         this.powerUps = [];
+        
+        // 在设置完基本属性后再创建UI实例
+        this.ui = new UI(this);
 
         this.score = 0;
         this.highScore = localStorage.getItem("pixelBirdHighScore") || 0;
@@ -364,9 +365,7 @@ class Game {
             }
             startX += SCORE_NUMBER_WIDTH + SCORE_PADDING;
         }
-    }
-
-    update(deltaTime) {
+    }    update(deltaTime) {
         // 在等待开始状态下，只更新小鸟的动画
         if (this.isWaitingForStart) {
             if (this.bird) {
@@ -386,7 +385,14 @@ class Game {
     }
 
     gameLoop(currentTime = 0) {
-        if (this.gameState !== GAME_STATE.PLAYING) return;
+        // 如果游戏不在运行状态，直接返回
+        if (this.gameState !== GAME_STATE.PLAYING) {
+            console.log("Game not in playing state:", this.gameState); // 调试日志
+            if (this.gameState === GAME_STATE.PAUSED) {
+                this.drawPausedState();
+            }
+            return;
+        }
 
         const deltaTime = currentTime - (this.lastTime || currentTime);
         this.lastTime = currentTime;
@@ -439,11 +445,78 @@ class Game {
             this.ctx.fillText('点击开始游戏', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
         }
     }
+
+    pauseGame() {
+        console.log("Pausing game...");
+        if (this.gameState === GAME_STATE.PLAYING) {
+            this.gameState = GAME_STATE.PAUSED;
+            // 彻底停止游戏循环
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+            // 保留当前游戏状态
+            this.lastTime = performance.now();
+            // 更新UI状态
+            this.ui.updatePauseButtonText();
+            // 绘制暂停界面
+            this.drawPausedState();
+            // 添加画布点击恢复监听
+            this.canvas.addEventListener("click", this.resumeHandler = () => this.resumeGame());
+        }
+    }
+
+    resumeGame() {
+        console.log("Resuming game...");
+        if (this.gameState === GAME_STATE.PAUSED) {
+            this.gameState = GAME_STATE.PLAYING;
+            this.lastTime = performance.now();
+            this.ui.updatePauseButtonText();
+            // 清除可能残留的动画帧
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            // 重新设置输入监听
+            this.setupInputListeners();
+            // 移除画布点击监听
+            this.canvas.removeEventListener("click", this.resumeHandler);
+            // 重置时间基准并启动新的游戏循环
+            this.lastTime = performance.now();
+            this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
+        }
+    }
+
+    drawPausedState() {
+        console.log("Drawing paused state..."); // 调试日志
+        this.ctx.save();
+        
+        // 用黑白滤镜重绘当前画面
+        this.ctx.filter = 'grayscale(100%)';
+        this.draw();
+        
+        // 添加半透明黑色遮罩
+        this.ctx.filter = 'none';
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // 绘制提示图片
+        if (this.helpImage && this.helpImage.complete) {
+            const x = (CANVAS_WIDTH - HELP_IMAGE_WIDTH) / 2;
+            const y = (CANVAS_HEIGHT - HELP_IMAGE_HEIGHT) / 2;
+            this.ctx.drawImage(this.helpImage, x, y, HELP_IMAGE_WIDTH, HELP_IMAGE_HEIGHT);
+            
+            // 绘制文字
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = 'bold 24px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('点击继续游戏', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
+        }
+        
+        this.ctx.restore();
+    }
 }
 
 // Initialize the game once the DOM is ready
 window.addEventListener("load", () => {
     new Game("game-canvas");
 });
-
-
