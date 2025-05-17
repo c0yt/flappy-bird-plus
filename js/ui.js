@@ -19,8 +19,11 @@ class UI {
         this.restartGameBtn = document.getElementById("restart-game-btn");
         this.mainMenuBtn = document.getElementById("main-menu-btn");
 
+        this.pauseBtn = document.getElementById("pause-btn");
+
         this.selectedDifficulty = null;
         this.setupEventListeners();
+        this.setupPauseButton();
     }
 
     setupEventListeners() {
@@ -37,6 +40,29 @@ class UI {
         });
         this.restartGameBtn.addEventListener("click", () => this.game.restartGame());
         this.mainMenuBtn.addEventListener("click", () => this.showStartScreen());
+    }    setupPauseButton() {
+        console.log("Setting up pause button"); // 调试日志
+        if (!this.pauseBtn) {
+            console.error("Pause button not found!");
+            return;
+        }
+          this.handlePauseClick = (e) => {
+            console.log("Pause button clicked"); // 调试日志
+            // 必须在最前面阻止事件冒泡
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (this.game.gameState === GAME_STATE.PLAYING) {
+                console.log("Attempting to pause game"); // 调试日志
+                this.game.pauseGame();
+            }
+            // 移除了暂停状态下的继续功能
+        };
+
+        // 移除可能存在的旧事件监听器
+        this.pauseBtn.removeEventListener("click", this.handlePauseClick);
+        // 添加新的事件监听器
+        this.pauseBtn.addEventListener("click", this.handlePauseClick);
     }
 
     selectDifficulty(difficulty) {
@@ -62,6 +88,7 @@ class UI {
         this.startScreen.classList.add("hidden");
         this.gameUI.classList.remove("hidden");
         this.gameOverScreen.classList.add("hidden");
+        this.updatePauseButtonText();
     }
 
     showGameOverScreen(score, highScore) {
@@ -80,6 +107,11 @@ class UI {
                 this.powerupStatusDisplay.textContent = "";
             }
         }
+    }    updatePauseButtonText() {
+        // 暂停按钮仅显示"暂停"
+        this.pauseBtn.textContent = "暂停";
+        // 在暂停状态下隐藏暂停按钮
+        this.pauseBtn.style.display = this.game.gameState === GAME_STATE.PAUSED ? "none" : "block";
     }
 }
 

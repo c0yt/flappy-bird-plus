@@ -71,7 +71,7 @@ const GAME_STATE = {
     DIFFICULTY_SELECT: 'DIFFICULTY_SELECT',
     PLAYING: 'PLAYING',
     GAME_OVER: 'GAME_OVER',
-    PAUSED: 'PAUSED' // Optional, if pause functionality is added
+    PAUSED: 'PAUSED'
 };
 
 // Asset paths (placeholders, update with actual paths/names)
@@ -116,6 +116,6 @@ const BIRD_ANIMATION_SPEED = 100; // 每帧动画持续时间（毫秒）
 const BIRD_FRAMES = ['bird1', 'bird2', 'bird3'];
 
 // 添加帮助提示相关常量
-const HELP_IMAGE_WIDTH = 200;  // 增加宽度
-const HELP_IMAGE_HEIGHT = 200; // 增加高度
+const HELP_IMAGE_WIDTH = 100;  // 增加宽度
+const HELP_IMAGE_HEIGHT = 100; // 增加高度
 
