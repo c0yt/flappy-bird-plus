@@ -444,42 +444,58 @@ class Game {    constructor(canvasId) {
             this.ctx.textAlign = 'center';
             this.ctx.fillText('点击开始游戏', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
         }
-    }
-
-    pauseGame() {
+    }    pauseGame() {
         console.log("Pausing game...");
         if (this.gameState === GAME_STATE.PLAYING) {
             this.gameState = GAME_STATE.PAUSED;
+            // 移除游戏中的点击事件处理器
+            document.removeEventListener("click", this.inputHandler);
+            document.removeEventListener("keydown", this.inputHandler);
+            
             // 彻底停止游戏循环
             if (this.animationFrameId) {
                 cancelAnimationFrame(this.animationFrameId);
                 this.animationFrameId = null;
             }
+            
             // 保留当前游戏状态
             this.lastTime = performance.now();
+            
             // 更新UI状态
             this.ui.updatePauseButtonText();
+            
             // 绘制暂停界面
             this.drawPausedState();
+            
             // 添加画布点击恢复监听
-            this.canvas.addEventListener("click", this.resumeHandler = () => this.resumeGame());
+            this.resumeHandler = (e) => {
+                if (this.gameState === GAME_STATE.PAUSED) {
+                    this.resumeGame();
+                }
+            };
+            
+            // 使用捕获阶段来确保这个事件处理器最先执行
+            document.addEventListener("click", this.resumeHandler, true);
         }
-    }
-
-    resumeGame() {
+    }    resumeGame() {
         console.log("Resuming game...");
         if (this.gameState === GAME_STATE.PAUSED) {
+            // 移除暂停时的点击监听器
+            document.removeEventListener("click", this.resumeHandler, true);
+            this.resumeHandler = null;
+            
             this.gameState = GAME_STATE.PLAYING;
             this.lastTime = performance.now();
             this.ui.updatePauseButtonText();
+            
             // 清除可能残留的动画帧
             if (this.animationFrameId) {
                 cancelAnimationFrame(this.animationFrameId);
             }
+            
             // 重新设置输入监听
             this.setupInputListeners();
-            // 移除画布点击监听
-            this.canvas.removeEventListener("click", this.resumeHandler);
+            
             // 重置时间基准并启动新的游戏循环
             this.lastTime = performance.now();
             this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));

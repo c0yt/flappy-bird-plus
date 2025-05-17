@@ -46,11 +46,11 @@ class UI {
             console.error("Pause button not found!");
             return;
         }
-        
-        this.handlePauseClick = (e) => {
+          this.handlePauseClick = (e) => {
             console.log("Pause button clicked"); // 调试日志
-            e.preventDefault();
+            // 必须在最前面阻止事件冒泡
             e.stopPropagation();
+            e.preventDefault();
             
             if (this.game.gameState === GAME_STATE.PLAYING) {
                 console.log("Attempting to pause game"); // 调试日志
