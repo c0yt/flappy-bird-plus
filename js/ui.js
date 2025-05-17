@@ -55,10 +55,8 @@ class UI {
             if (this.game.gameState === GAME_STATE.PLAYING) {
                 console.log("Attempting to pause game"); // 调试日志
                 this.game.pauseGame();
-            } else if (this.game.gameState === GAME_STATE.PAUSED) {
-                console.log("Attempting to resume game"); // 调试日志
-                this.game.resumeGame();
             }
+            // 移除了暂停状态下的继续功能
         };
 
         // 移除可能存在的旧事件监听器
@@ -109,11 +107,11 @@ class UI {
                 this.powerupStatusDisplay.textContent = "";
             }
         }
-    }
-
-    updatePauseButtonText() {
-        this.pauseBtn.textContent = 
-            this.game.gameState === GAME_STATE.PAUSED ? "继续" : "暂停";
+    }    updatePauseButtonText() {
+        // 暂停按钮仅显示"暂停"
+        this.pauseBtn.textContent = "暂停";
+        // 在暂停状态下隐藏暂停按钮
+        this.pauseBtn.style.display = this.game.gameState === GAME_STATE.PAUSED ? "none" : "block";
     }
 }
 

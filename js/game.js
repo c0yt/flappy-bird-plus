@@ -81,9 +81,7 @@ class Game {    constructor(canvasId) {
             this.currentDifficultySettings = {...DIFFICULTIES.normal}; // 使用深拷贝
         }
         console.log("Difficulty set to:", difficultyKey, this.currentDifficultySettings);
-    }
-
-    startGame() {
+    }    startGame() {
         if (!this.currentDifficultySettings) {
             console.error("No difficulty settings found!");
             alert("请先选择难度再开始游戏!");
@@ -91,16 +89,18 @@ class Game {    constructor(canvasId) {
             return;
         }
 
-        this.isWaitingForStart = true;  // 开始游戏时显示
-
         // 重置游戏状态
-        this.gameState = GAME_STATE.PLAYING;
         this.score = 0;
         this.pipes = [];
         this.coins = [];  // 重置金币数组
         this.powerUps = [];
         this.currentSpeedMultiplier = 1.0;
         this.lastTime = null;
+
+        // 初始化游戏但保持暂停状态
+        this.gameState = GAME_STATE.PLAYING;
+        // 立即暂停游戏
+        setTimeout(() => this.pauseGame(), 0);
         
         // 初始化小鸟
         this.bird = new Bird(this);
@@ -525,7 +525,7 @@ class Game {    constructor(canvasId) {
             this.ctx.fillStyle = 'white';
             this.ctx.font = 'bold 24px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('点击继续游戏', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
+            this.ctx.fillText('Tap to continue', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
         }
         
         this.ctx.restore();
