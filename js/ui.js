@@ -70,11 +70,23 @@ class UI {
 
     selectDifficulty(difficulty) {
         this.selectedDifficulty = difficulty;
-        // Visual feedback for selected difficulty
-        [this.easyBtn, this.normalBtn, this.hardBtn].forEach(btn => btn.style.borderColor = "#fff");
-        if (difficulty === "easy") this.easyBtn.style.borderColor = "#0f0";
-        if (difficulty === "normal") this.normalBtn.style.borderColor = "#ff0";
-        if (difficulty === "hard") this.hardBtn.style.borderColor = "#f00";
+        // 移除所有按钮的选中状态和动画
+        [this.easyBtn, this.normalBtn, this.hardBtn].forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.transform = 'scale(1)';
+            btn.style.filter = 'brightness(0.9)';
+        });
+        
+        // 为选中的按钮添加选中状态和动画
+        const selectedBtn = {
+            'easy': this.easyBtn,
+            'normal': this.normalBtn,
+            'hard': this.hardBtn
+        }[difficulty];
+        
+        if (selectedBtn) {
+            selectedBtn.classList.add('selected');
+        }
         console.log(`Difficulty selected: ${difficulty}`);
     }
 
@@ -84,7 +96,12 @@ class UI {
         this.gameUI.classList.add("hidden");
         this.gameOverScreen.classList.add("hidden");
         this.selectedDifficulty = null; // Reset selected difficulty
-        [this.easyBtn, this.normalBtn, this.hardBtn].forEach(btn => btn.style.borderColor = "#fff");
+        // 重置所有按钮状态
+        [this.easyBtn, this.normalBtn, this.hardBtn].forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.transform = 'scale(1)';
+            btn.style.filter = 'brightness(0.9)';
+        });
     }
 
     showGameUI() {
@@ -164,7 +181,6 @@ class UI {
             const dashOffset = circumference * (1 - timeRatio);
             
             // 根据剩余时间比例计算颜色
-            // 从绿色(#00FF00)过渡到黄色(#FFFF00)再到红色(#FF0000)
             let color;
             if (timeRatio > 0.6) {
                 // 从绿色到黄色的过渡 (60%-100%)
@@ -179,8 +195,6 @@ class UI {
             }
             
             progressCircle.setAttribute("stroke", color);
-            
-            // 设置虚线属性来显示进度
             progressCircle.setAttribute("stroke-dasharray", circumference);
             progressCircle.setAttribute("stroke-dashoffset", dashOffset);
             progressCircle.setAttribute("transform", "rotate(-90, 25, 25)"); // 从顶部开始
@@ -193,23 +207,24 @@ class UI {
             this.powerupStatusDisplay.appendChild(svg);
             this.powerupStatusDisplay.appendChild(iconElement);
         }
-    }    updatePauseButtonText() {
-            // 使用图片替换文本
-            this.pauseBtn.textContent = ''; // 清除按钮文本
-            
-            // 设置样式
-            this.pauseBtn.style.backgroundImage = `url(${ASSETS.pause})`;
-            this.pauseBtn.style.backgroundSize = 'contain';
-            this.pauseBtn.style.backgroundRepeat = 'no-repeat';
-            this.pauseBtn.style.backgroundPosition = 'center';
-            this.pauseBtn.style.backgroundColor = 'transparent'; // 透明背景
-            this.pauseBtn.style.border = 'none'; // 移除边框
-            this.pauseBtn.style.width = '50px';  // 固定宽度
-            this.pauseBtn.style.height = '50px'; // 固定高度
-            this.pauseBtn.style.padding = '0';   // 移除内边距
-            
-            // 在暂停状态下或等待开始状态下隐藏暂停按钮
-            this.pauseBtn.style.display = (this.game.gameState === GAME_STATE.PAUSED || this.game.isWaitingForStart) ? "none" : "block";
+    }
+
+    updatePauseButtonText() {
+        // 使用图片替换文本
+        this.pauseBtn.textContent = ''; // 清除按钮文本
+        
+        // 设置样式
+        this.pauseBtn.style.backgroundImage = `url(${ASSETS.pause})`;
+        this.pauseBtn.style.backgroundSize = 'contain';
+        this.pauseBtn.style.backgroundRepeat = 'no-repeat';
+        this.pauseBtn.style.backgroundPosition = 'center';
+        this.pauseBtn.style.backgroundColor = 'transparent'; // 透明背景
+        this.pauseBtn.style.border = 'none'; // 移除边框
+        this.pauseBtn.style.width = '50px';  // 固定宽度
+        this.pauseBtn.style.height = '50px'; // 固定高度
+        this.pauseBtn.style.padding = '0';   // 移除内边距
+        
+        // 在暂停状态下或等待开始状态下隐藏暂停按钮
+        this.pauseBtn.style.display = (this.game.gameState === GAME_STATE.PAUSED || this.game.isWaitingForStart) ? "none" : "block";
     }
 }
-

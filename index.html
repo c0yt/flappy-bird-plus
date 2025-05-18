@@ -11,14 +11,17 @@
         <canvas id="game-canvas"></canvas>
 
         <div id="start-screen" class="screen">
-            <h1>像素鸟++</h1>
-            <div id="difficulty-selection">
-                <p>选择难度:</p>
-                <button id="easy-btn" data-difficulty="easy">简单</button>
-                <button id="normal-btn" data-difficulty="normal">一般</button>
-                <button id="hard-btn" data-difficulty="hard">困难</button>
+            <div class="game-title">
+                <img src="assets/title.png" alt="像素鸟++" id="title-image">
             </div>
-            <button id="start-game-btn">开始游戏</button>
+            <div id="difficulty-selection">
+                <div class="difficulty-buttons">
+                    <button id="easy-btn" class="difficulty-btn" data-difficulty="easy"></button>
+                    <button id="normal-btn" class="difficulty-btn" data-difficulty="normal"></button>
+                    <button id="hard-btn" class="difficulty-btn" data-difficulty="hard"></button>
+                </div>
+            </div>
+            <button id="start-game-btn" class="image-btn"></button>
         </div>
 
         <div id="game-ui" class="hidden">
