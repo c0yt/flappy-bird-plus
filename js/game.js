@@ -127,12 +127,25 @@ class Game {    constructor(canvasId) {
     }
 
     setupInputListeners() {
-        // 移除旧的事件监听器（如果存在）
         if (this.inputHandler) {
             document.removeEventListener("click", this.inputHandler);
             document.removeEventListener("keydown", this.inputHandler);
         }
 
+        // 添加一个专门用于Ctrl键的事件处理器
+        this.ctrlKeyHandler = (e) => {
+            // 检查是否按下了Ctrl键
+            if (e.key === 'Control' || e.keyCode === 17) {
+                console.log("Ctrl key pressed");
+                if (this.gameState === GAME_STATE.PLAYING) {
+                    this.pauseGame();
+                } else if (this.gameState === GAME_STATE.PAUSED) {
+                    this.resumeGame();
+                }
+            }
+        };
+
+        // 原有的输入处理
         this.inputHandler = (e) => {
             if (this.gameState === GAME_STATE.PLAYING) {
                 if (this.isWaitingForStart) {
@@ -145,14 +158,17 @@ class Game {    constructor(canvasId) {
             }
         };
 
+        // 添加事件监听
         document.addEventListener("click", this.inputHandler);
         document.addEventListener("keydown", this.inputHandler);
+        document.addEventListener("keydown", this.ctrlKeyHandler);  // 添加Ctrl键监听
     }
 
     restartGame() {
         if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
         document.removeEventListener("click", this.inputHandler);
         document.removeEventListener("keydown", this.inputHandler);
+        document.removeEventListener("keydown", this.pauseResumeHandler); // 删除Ctrl键监听
         this.startGame(); // Will re-select current difficulty and start
     }
 
@@ -445,61 +461,63 @@ class Game {    constructor(canvasId) {
             this.ctx.fillText('点击开始游戏', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
         }
     }    pauseGame() {
-        console.log("Pausing game...");
-        if (this.gameState === GAME_STATE.PLAYING) {
-            this.gameState = GAME_STATE.PAUSED;
-            // 移除游戏中的点击事件处理器
-            document.removeEventListener("click", this.inputHandler);
-            document.removeEventListener("keydown", this.inputHandler);
-            
-            // 彻底停止游戏循环
-            if (this.animationFrameId) {
-                cancelAnimationFrame(this.animationFrameId);
-                this.animationFrameId = null;
-            }
-            
-            // 保留当前游戏状态
-            this.lastTime = performance.now();
-            
-            // 更新UI状态
-            this.ui.updatePauseButtonText();
-            
-            // 绘制暂停界面
-            this.drawPausedState();
-            
-            // 添加画布点击恢复监听
-            this.resumeHandler = (e) => {
-                if (this.gameState === GAME_STATE.PAUSED) {
-                    this.resumeGame();
+            console.log("Pausing game...");
+            if (this.gameState === GAME_STATE.PLAYING) {
+                this.gameState = GAME_STATE.PAUSED;
+                // 移除游戏中的点击事件处理器
+                document.removeEventListener("click", this.inputHandler);
+                document.removeEventListener("keydown", this.inputHandler);
+                
+                // 保留Ctrl键监听器用于恢复游戏
+                
+                // 彻底停止游戏循环
+                if (this.animationFrameId) {
+                    cancelAnimationFrame(this.animationFrameId);
+                    this.animationFrameId = null;
                 }
-            };
-            
-            // 使用捕获阶段来确保这个事件处理器最先执行
-            document.addEventListener("click", this.resumeHandler, true);
-        }
-    }    resumeGame() {
-        console.log("Resuming game...");
-        if (this.gameState === GAME_STATE.PAUSED) {
-            // 移除暂停时的点击监听器
-            document.removeEventListener("click", this.resumeHandler, true);
-            this.resumeHandler = null;
-            
-            this.gameState = GAME_STATE.PLAYING;
-            this.lastTime = performance.now();
-            this.ui.updatePauseButtonText();
-            
-            // 清除可能残留的动画帧
-            if (this.animationFrameId) {
-                cancelAnimationFrame(this.animationFrameId);
+                
+                // 保留当前游戏状态
+                this.lastTime = performance.now();
+                
+                // 更新UI状态
+                this.ui.updatePauseButtonText();
+                
+                // 绘制暂停界面
+                this.drawPausedState();
+                
+                // 添加画布点击恢复监听
+                this.resumeHandler = (e) => {
+                    if (this.gameState === GAME_STATE.PAUSED) {
+                        this.resumeGame();
+                    }
+                };
+                
+                // 使用捕获阶段来确保这个事件处理器最先执行
+                document.addEventListener("click", this.resumeHandler, true);
             }
-            
-            // 重新设置输入监听
-            this.setupInputListeners();
-            
-            // 重置时间基准并启动新的游戏循环
-            this.lastTime = performance.now();
-            this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
-        }
+    }    resumeGame() {
+            console.log("Resuming game...");
+            if (this.gameState === GAME_STATE.PAUSED) {
+                // 移除暂停时的点击监听器
+                document.addEventListener("keydown", this.ctrlKeyHandler);
+                this.resumeHandler = null;
+                
+                this.gameState = GAME_STATE.PLAYING;
+                this.lastTime = performance.now();
+                this.ui.updatePauseButtonText();
+                
+                // 清除可能残留的动画帧
+                if (this.animationFrameId) {
+                    cancelAnimationFrame(this.animationFrameId);
+                }
+                
+                // 重新设置输入监听
+                this.setupInputListeners();
+                
+                // 重置时间基准并启动新的游戏循环
+                this.lastTime = performance.now();
+                this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
+            }
     }
 
     drawPausedState() {
@@ -530,6 +548,7 @@ class Game {    constructor(canvasId) {
         
         this.ctx.restore();
     }
+    
 }
 
 // Initialize the game once the DOM is ready

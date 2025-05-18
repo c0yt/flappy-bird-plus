@@ -21,7 +21,7 @@ class Pipe {
         this.imageTop = new Image();
         this.imageTop.src = ASSETS.pipeTop;
         this.imageBottom = new Image();
-        this.imageBottom.src = ASSETS.pipeBottom;
+        this.imageBottom.src = ASSETS.pipeTop;
 
         // 从currentDifficultySettings获取设置
         const difficulty = this.game.currentDifficultySettings;

@@ -108,6 +108,7 @@ const ASSETS = {
     coinGold: './assets/coin_gold.png',   // 添加相对路径
     coinSilver: './assets/coin_silver.png',
     tapToStart: './assets/Tap.png',  // 添加点击开始提示图片
+    pause: './assets/pause.png',     // 添加暂停按钮图片
 };
 
 // 添加得分显示相关常量

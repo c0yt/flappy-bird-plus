@@ -24,6 +24,9 @@ class UI {
         this.selectedDifficulty = null;
         this.setupEventListeners();
         this.setupPauseButton();
+        // 添加暂停按钮图片
+        this.pauseImage = new Image();
+        this.pauseImage.src = ASSETS.pause;
     }
 
     setupEventListeners() {
@@ -108,10 +111,22 @@ class UI {
             }
         }
     }    updatePauseButtonText() {
-        // 暂停按钮仅显示"暂停"
-        this.pauseBtn.textContent = "暂停";
-        // 在暂停状态下隐藏暂停按钮
-        this.pauseBtn.style.display = this.game.gameState === GAME_STATE.PAUSED ? "none" : "block";
+            // 使用图片替换文本
+            this.pauseBtn.textContent = ''; // 清除按钮文本
+            
+            // 设置样式
+            this.pauseBtn.style.backgroundImage = `url(${ASSETS.pause})`;
+            this.pauseBtn.style.backgroundSize = 'contain';
+            this.pauseBtn.style.backgroundRepeat = 'no-repeat';
+            this.pauseBtn.style.backgroundPosition = 'center';
+            this.pauseBtn.style.backgroundColor = 'transparent'; // 透明背景
+            this.pauseBtn.style.border = 'none'; // 移除边框
+            this.pauseBtn.style.width = '50px';  // 固定宽度
+            this.pauseBtn.style.height = '50px'; // 固定高度
+            this.pauseBtn.style.padding = '0';   // 移除内边距
+            
+            // 在暂停状态下隐藏暂停按钮
+            this.pauseBtn.style.display = this.game.gameState === GAME_STATE.PAUSED ? "none" : "block";
     }
 }
 
