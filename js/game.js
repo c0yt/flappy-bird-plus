@@ -37,6 +37,14 @@ class Game {    constructor(canvasId) {
         this.helpImage = new Image();
         this.helpImage.src = ASSETS.tapToStart;
         this.isWaitingForStart = false; // 初始化时不显示
+        
+        // 预加载ready图片
+        this.readyImage = new Image();
+        this.readyImage.src = ASSETS.ready;
+        
+        // 预加载start图片
+        this.startImage = new Image();
+        this.startImage.src = ASSETS.start;
 
         this.loadAssets();
         this.ui.showStartScreen();
@@ -81,14 +89,15 @@ class Game {    constructor(canvasId) {
             this.currentDifficultySettings = {...DIFFICULTIES.normal}; // 使用深拷贝
         }
         console.log("Difficulty set to:", difficultyKey, this.currentDifficultySettings);
-    }    startGame() {
+    }    // 在startGame方法中设置isWaitingForStart为true
+    startGame() {
         if (!this.currentDifficultySettings) {
             console.error("No difficulty settings found!");
             alert("请先选择难度再开始游戏!");
             this.ui.showStartScreen();
             return;
         }
-
+    
         // 重置游戏状态
         this.score = 0;
         this.pipes = [];
@@ -96,42 +105,118 @@ class Game {    constructor(canvasId) {
         this.powerUps = [];
         this.currentSpeedMultiplier = 1.0;
         this.lastTime = null;
-
+    
         // 初始化游戏但保持暂停状态
         this.gameState = GAME_STATE.PLAYING;
-        // 立即暂停游戏
-        setTimeout(() => this.pauseGame(), 0);
+        // 设置等待开始状态为true
+        this.isWaitingForStart = true;
         
         // 初始化小鸟
         this.bird = new Bird(this);
         
         // 显示游戏UI
         this.ui.showGameUI();
+        // 更新暂停按钮状态
+        this.ui.updatePauseButtonText();
         // 仅在确认UI方法存在时调用
         if (this.ui.updatePowerupStatus) {
             this.ui.updatePowerupStatus("", 0);
         }
-
+    
         // 设置管道生成
         this.pipeSpawnTimer = -this.currentDifficultySettings.initialPipeDelay; // 使用难度设置中的初始延迟
         this.setNextPipeSpawnInterval();
-
+    
         // 设置输入监听
         this.setupInputListeners();
-
+    
         // 开始游戏循环
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
         }
         this.gameLoop();
     }
-
+    
+    // 修改pauseGame方法，区分暂停和开始状态
+    pauseGame() {
+        console.log("Pausing game...");
+        if (this.gameState === GAME_STATE.PLAYING) {
+            this.gameState = GAME_STATE.PAUSED;
+            // 移除游戏中的点击事件处理器
+            document.removeEventListener("click", this.inputHandler);
+            document.removeEventListener("keydown", this.inputHandler);
+            
+            // 保留Ctrl键监听器用于恢复游戏
+            
+            // 彻底停止游戏循环
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+            
+            // 保留当前游戏状态
+            this.lastTime = performance.now();
+            
+            // 更新UI状态
+            this.ui.updatePauseButtonText();
+            
+            // 绘制暂停界面，只有在不是等待开始状态时才显示暂停界面
+            if (!this.isWaitingForStart) {
+                this.drawPausedState();
+            } else {
+                // 如果是等待开始状态，继续绘制开始界面
+                this.draw();
+            }
+            
+            // 添加画布点击恢复监听
+            this.resumeHandler = (e) => {
+                if (this.gameState === GAME_STATE.PAUSED) {
+                    this.resumeGame();
+                }
+            };
+            
+            // 使用捕获阶段来确保这个事件处理器最先执行
+            document.addEventListener("click", this.resumeHandler, true);
+        }
+    }
+    
+    // 修改drawPausedState方法，确保只在真正暂停时显示"Tap to continue"
+    drawPausedState() {
+        console.log("Drawing paused state..."); // 调试日志
+        this.ctx.save();
+        
+        // 用黑白滤镜重绘当前画面
+        this.ctx.filter = 'grayscale(100%)';
+        this.draw();
+        
+        // 添加半透明黑色遮罩
+        this.ctx.filter = 'none';
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // 绘制提示图片
+        if (this.helpImage && this.helpImage.complete) {
+            const x = (CANVAS_WIDTH - HELP_IMAGE_WIDTH) / 2;
+            const y = (CANVAS_HEIGHT - HELP_IMAGE_HEIGHT) / 2;
+            this.ctx.drawImage(this.helpImage, x, y, HELP_IMAGE_WIDTH, HELP_IMAGE_HEIGHT);
+            
+            // 绘制文字
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = 'bold 24px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('Tap to continue', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
+        }
+        
+        this.ctx.restore();
+    }
+    
+    // 修改setupInputListeners方法，处理开始状态的点击
     setupInputListeners() {
         if (this.inputHandler) {
             document.removeEventListener("click", this.inputHandler);
             document.removeEventListener("keydown", this.inputHandler);
         }
-
+    
         // 添加一个专门用于Ctrl键的事件处理器
         this.ctrlKeyHandler = (e) => {
             // 检查是否按下了Ctrl键
@@ -144,20 +229,41 @@ class Game {    constructor(canvasId) {
                 }
             }
         };
-
+    
         // 原有的输入处理
         this.inputHandler = (e) => {
             if (this.gameState === GAME_STATE.PLAYING) {
                 if (this.isWaitingForStart) {
-                    this.isWaitingForStart = false;
-                    return;
-                }
-                if (this.bird && (e.type === "click" || (e.type === "keydown" && (e.code === "Space" || e.code === "ArrowUp")))) {
+                    // 检查点击是否在开始按钮区域内
+                    const x = (CANVAS_WIDTH - 100) / 2;
+                    const y = (CANVAS_HEIGHT - HELP_IMAGE_HEIGHT) / 2 + 50 + HELP_IMAGE_HEIGHT + 20;
+                    const width = 100;
+                    const height = 50;
+                    
+                    // 获取点击坐标
+                    let clickX, clickY;
+                    if (e.type === "click") {
+                        const rect = this.canvas.getBoundingClientRect();
+                        clickX = e.clientX - rect.left;
+                        clickY = e.clientY - rect.top;
+                    }
+                    
+                    // 如果点击在开始按钮区域内或者按下了空格/上箭头键
+                    if ((e.type === "click" && 
+                         clickX >= x && clickX <= x + width && 
+                         clickY >= y && clickY <= y + height) || 
+                        (e.type === "keydown" && (e.code === "Space" || e.code === "ArrowUp"))) {
+                        this.isWaitingForStart = false;
+                        // 更新暂停按钮状态
+                        this.ui.updatePauseButtonText();
+                        return;
+                    }
+                } else if (this.bird && (e.type === "click" || (e.type === "keydown" && (e.code === "Space" || e.code === "ArrowUp")))) {
                     this.bird.flap();
                 }
             }
         };
-
+    
         // 添加事件监听
         document.addEventListener("click", this.inputHandler);
         document.addEventListener("keydown", this.inputHandler);
@@ -449,16 +555,40 @@ class Game {    constructor(canvasId) {
         this.drawScore();
 
         // 绘制帮助图片（确保在最上层）
-        if (this.isWaitingForStart && this.helpImage && this.helpImage.complete) {
-            const x = (CANVAS_WIDTH - HELP_IMAGE_WIDTH) / 2;
-            const y = (CANVAS_HEIGHT - HELP_IMAGE_HEIGHT) / 2 + 50;
-            this.ctx.drawImage(this.helpImage, x, y, HELP_IMAGE_WIDTH, HELP_IMAGE_HEIGHT);
+        if (this.isWaitingForStart) {
+            // 加载ready图片
+            const readyImage = new Image();
+            readyImage.src = ASSETS.ready;
             
-            // 添加文字提示
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = '20px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('点击开始游戏', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
+            // 加载start图片
+            const startImage = new Image();
+            startImage.src = ASSETS.start;
+            
+            if (this.helpImage && this.helpImage.complete) {
+                const x = (CANVAS_WIDTH - HELP_IMAGE_WIDTH) / 2;
+                const y = (CANVAS_HEIGHT - HELP_IMAGE_HEIGHT) / 2 + 50;
+                
+                // 绘制帮助图片
+                this.ctx.drawImage(this.helpImage, x, y, HELP_IMAGE_WIDTH, HELP_IMAGE_HEIGHT);
+                
+                // 绘制ready图片在顶部
+                if (readyImage.complete) {
+                    const readyWidth = 200;
+                    const readyHeight = 80;
+                    const readyX = (CANVAS_WIDTH - readyWidth) / 2;
+                    const readyY = y - readyHeight - 20; // 在帮助图片上方20像素
+                    this.ctx.drawImage(readyImage, readyX, readyY, readyWidth, readyHeight);
+                }
+                
+                // 绘制start按钮在底部
+                if (startImage.complete) {
+                    const startWidth = 100;
+                    const startHeight = 50;
+                    const startX = (CANVAS_WIDTH - startWidth) / 2;
+                    const startY = y + HELP_IMAGE_HEIGHT + 20; // 在帮助图片下方20像素
+                    this.ctx.drawImage(startImage, startX, startY, startWidth, startHeight);
+                }
+            }
         }
     }    pauseGame() {
             console.log("Pausing game...");

@@ -109,6 +109,8 @@ const ASSETS = {
     coinSilver: './assets/coin_silver.png',
     tapToStart: './assets/Tap.png',  // 添加点击开始提示图片
     pause: './assets/pause.png',     // 添加暂停按钮图片
+    ready: './assets/ready.png',     // 添加准备图片
+    start: './assets/start.png',     // 添加开始按钮图片
 };
 
 // 添加得分显示相关常量

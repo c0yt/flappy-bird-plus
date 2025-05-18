@@ -125,8 +125,8 @@ class UI {
             this.pauseBtn.style.height = '50px'; // 固定高度
             this.pauseBtn.style.padding = '0';   // 移除内边距
             
-            // 在暂停状态下隐藏暂停按钮
-            this.pauseBtn.style.display = this.game.gameState === GAME_STATE.PAUSED ? "none" : "block";
+            // 在暂停状态下或等待开始状态下隐藏暂停按钮
+            this.pauseBtn.style.display = (this.game.gameState === GAME_STATE.PAUSED || this.game.isWaitingForStart) ? "none" : "block";
     }
 }
 
