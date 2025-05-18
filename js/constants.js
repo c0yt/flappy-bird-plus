@@ -23,14 +23,15 @@ const PIPE_SPAWN_INTERVAL_MAX = 2500; // ms, max time between new pipe spawns
 const COIN_SIZE = 40; // Diameter for a round coin, or width/height for square
 const COIN_GOLD_VALUE = 2;
 const COIN_SILVER_VALUE = 1;
-const COIN_SPAWN_CHANCE = 0.8; // 提高到80%的概率生成金币
+const COIN_SPAWN_CHANCE = 0.6; // 提高到80%的概率生成金币
 
 // Power-up properties
 const POWERUP_SIZE = 50; // 原来是24，改为36使其更容易看见和收集
-const POWERUP_SPAWN_CHANCE = 0.1; // 10% chance to spawn instead of a coin
+const POWERUP_SPAWN_CHANCE = 0.5; // 10% chance to spawn instead of a coin
 const POWERUP_DURATION = 5000; // 5 seconds for most power-ups
 const SHIELD_SPEED_BOOST = 1.2; // 20% speed boost with shield
-const MAGNET_RADIUS = 80; // Pixels
+const MAGNET_RADIUS = 200; // Pixels
+const MAGNET_STRENGTH = 5; // 增加磁铁吸引力
 
 // Difficulty settings
 const DIFFICULTIES = {

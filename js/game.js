@@ -363,6 +363,33 @@ class Game {    constructor(canvasId) {
         for (let i = this.coins.length - 1; i >= 0; i--) {
             const coin = this.coins[i];
             coin.speed = currentSpeed;
+            
+            // 增强磁铁效果逻辑
+            if (this.isMagnetActive && this.bird) {
+                // 计算金币与小鸟的距离
+                const dx = this.bird.x - coin.x;
+                const dy = this.bird.y - coin.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // 如果在磁铁吸引范围内
+                if (distance < MAGNET_RADIUS) {
+                    // 计算吸引方向
+                    const angle = Math.atan2(dy, dx);
+                    // 增强吸引速度，使用MAGNET_STRENGTH常量
+                    const attractionSpeed = MAGNET_STRENGTH * (1 - distance / MAGNET_RADIUS);
+                    
+                    // 向小鸟移动，增加移动速度
+                    coin.x += Math.cos(angle) * attractionSpeed * 2;
+                    coin.y += Math.sin(angle) * attractionSpeed * 2;
+                    
+                    // 如果非常接近小鸟，直接吸附
+                    if (distance < 30) {
+                        coin.x = this.bird.x;
+                        coin.y = this.bird.y;
+                    }
+                }
+            }
+            
             coin.update(deltaTime);
             if (coin.isOffscreen() || coin.collected) {
                 this.coins.splice(i, 1);
@@ -396,7 +423,12 @@ class Game {    constructor(canvasId) {
             }
             if (!pipePair.passed && birdBounds.x > pipePair.x + pipePair.width) {
                 pipePair.passed = true;
-                this.score++;
+                // 修改这里，考虑双倍得分效果
+                if (this.isDoubleScoreActive) {
+                    this.score += 2;  // 双倍得分
+                } else {
+                    this.score++;  // 正常得分
+                }
             }
         }
 
@@ -441,11 +473,11 @@ class Game {    constructor(canvasId) {
     }
 
     handleActivePowerUps(deltaTime) {
-        // 磁铁道具已经没有作用了，因为没有金币系统
+        // 修改注释，移除错误信息
         if (this.isMagnetActive && Date.now() > this.magnetEndTime) {
             this.deactivateMagnet();
         }
-
+    
         if (this.isDoubleScoreActive && Date.now() > this.doubleScoreEndTime) {
             this.deactivateDoubleScore();
         }
@@ -455,6 +487,16 @@ class Game {    constructor(canvasId) {
             this.ui.updatePowerupStatus("护盾", (this.bird.shieldEndTime - Date.now()) / 1000);
         } else if (this.currentSpeedMultiplier !== 1.0 && !(this.bird && this.bird.isShieldActive)) {
             this.currentSpeedMultiplier = 1.0;
+        }
+        
+        // 添加磁铁状态更新
+        if (this.isMagnetActive) {
+            this.ui.updatePowerupStatus("磁铁", (this.magnetEndTime - Date.now()) / 1000);
+        }
+        
+        // 添加双倍得分状态更新
+        if (this.isDoubleScoreActive) {
+            this.ui.updatePowerupStatus("双倍得分", (this.doubleScoreEndTime - Date.now()) / 1000);
         }
     }
 
