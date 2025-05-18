@@ -42,6 +42,9 @@ const DIFFICULTIES = {
         pipeVerticalGapMax: 180,
         birdFlapPower: -5.5,      // Slightly stronger flap
         gravity: 0.22,
+        pipeSpawnIntervalMin: 2500,  // 更长的生成间隔
+        pipeSpawnIntervalMax: 3500,
+        initialPipeDelay: 1500,    // 开局等待3秒再生成管道
     },
     normal: {
         pipeSpeed: 2.0,
@@ -52,16 +55,22 @@ const DIFFICULTIES = {
         pipeVerticalGapMax: PIPE_HOLE_MAX,
         birdFlapPower: BIRD_FLAP_POWER,
         gravity: GRAVITY,
+        pipeSpawnIntervalMin: PIPE_SPAWN_INTERVAL_MIN,
+        pipeSpawnIntervalMax: PIPE_SPAWN_INTERVAL_MAX,
+        initialPipeDelay: 1000,    // 开局等待2秒再生成管道
     },
     hard: {
         pipeSpeed: 2.8,
         pipeVerticalMove: 1.0,    // Faster vertical movement amplitude
         pipeVerticalMoveSpeed: 0.02,
-        pipeHorizontalGap: 160,   // Narrower gap
+        pipeHorizontalGap: 250,   // Narrower gap
         pipeVerticalGapMin: 90,
         pipeVerticalGapMax: 120,
         birdFlapPower: -4.5,      // Weaker flap, harder to control
         gravity: 0.28,
+        pipeSpawnIntervalMin: 1000,  // 更短的生成间隔
+        pipeSpawnIntervalMax: 2000,
+        initialPipeDelay: 1500,    // 开局等待1.5秒再生成管道
     }
 };
 
