@@ -473,15 +473,17 @@ class Game {    constructor(canvasId) {
     }
 
     handleActivePowerUps(deltaTime) {
-        // 修改注释，移除错误信息
+        // 检查磁铁状态
         if (this.isMagnetActive && Date.now() > this.magnetEndTime) {
             this.deactivateMagnet();
         }
     
+        // 检查双倍得分状态
         if (this.isDoubleScoreActive && Date.now() > this.doubleScoreEndTime) {
             this.deactivateDoubleScore();
         }
         
+        // 检查护盾状态
         if (this.bird && this.bird.isShieldActive) {
             this.currentSpeedMultiplier = SHIELD_SPEED_BOOST;
             this.ui.updatePowerupStatus("护盾", (this.bird.shieldEndTime - Date.now()) / 1000);
@@ -489,14 +491,15 @@ class Game {    constructor(canvasId) {
             this.currentSpeedMultiplier = 1.0;
         }
         
-        // 添加磁铁状态更新
-        if (this.isMagnetActive) {
+        // 更新UI显示 - 按优先级显示（只显示一个道具）
+        if (this.bird && this.bird.isShieldActive) {
+            this.ui.updatePowerupStatus("护盾", (this.bird.shieldEndTime - Date.now()) / 1000);
+        } else if (this.isMagnetActive) {
             this.ui.updatePowerupStatus("磁铁", (this.magnetEndTime - Date.now()) / 1000);
-        }
-        
-        // 添加双倍得分状态更新
-        if (this.isDoubleScoreActive) {
+        } else if (this.isDoubleScoreActive) {
             this.ui.updatePowerupStatus("双倍得分", (this.doubleScoreEndTime - Date.now()) / 1000);
+        } else {
+            this.ui.updatePowerupStatus("", 0);
         }
     }
 

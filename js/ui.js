@@ -104,11 +104,94 @@ class UI {
 
     updatePowerupStatus(powerupName, timeLeft) {
         if (this.powerupStatusDisplay) {
-            if (powerupName && timeLeft > 0) {
-                this.powerupStatusDisplay.textContent = `${powerupName} 剩余: ${timeLeft.toFixed(1)}s`;
-            } else {
-                this.powerupStatusDisplay.textContent = "";
+            // 清空当前内容
+            this.powerupStatusDisplay.innerHTML = "";
+            
+            // 如果没有激活的道具，直接返回
+            if (!powerupName || timeLeft <= 0) {
+                return;
             }
+            
+            // 创建道具图标元素
+            const iconElement = document.createElement('img');
+            iconElement.className = 'powerup-icon';
+            
+            // 根据道具类型设置图标
+            switch(powerupName) {
+                case '护盾':
+                    iconElement.src = ASSETS.powerupShield;
+                    break;
+                case '磁铁':
+                    iconElement.src = ASSETS.powerupMagnet;
+                    break;
+                case '双倍得分':
+                    iconElement.src = ASSETS.powerupDoubleScore;
+                    break;
+                default:
+                    return; // 未知道具类型，不显示
+            }
+            
+            // 创建SVG圆形进度条
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "50");
+            svg.setAttribute("height", "50");
+            svg.setAttribute("viewBox", "0 0 50 50");
+            svg.setAttribute("class", "powerup-timer");
+            
+            // 背景圆
+            const bgCircle = document.createElementNS(svgNS, "circle");
+            bgCircle.setAttribute("cx", "25");
+            bgCircle.setAttribute("cy", "25");
+            bgCircle.setAttribute("r", "20");
+            bgCircle.setAttribute("fill", "none");
+            bgCircle.setAttribute("stroke", "#333");
+            bgCircle.setAttribute("stroke-width", "4");
+            bgCircle.setAttribute("opacity", "0.5");
+            
+            // 进度圆 - 计算剩余时间比例
+            const progressCircle = document.createElementNS(svgNS, "circle");
+            progressCircle.setAttribute("cx", "25");
+            progressCircle.setAttribute("cy", "25");
+            progressCircle.setAttribute("r", "20");
+            progressCircle.setAttribute("fill", "none");
+            progressCircle.setAttribute("stroke-width", "4");
+            
+            // 计算圆周长和剩余部分
+            const circumference = 2 * Math.PI * 20;
+            const maxDuration = POWERUP_DURATION / 1000; // 使用常量中定义的道具持续时间
+            const timeRatio = Math.min(timeLeft / maxDuration, 1);
+            const dashOffset = circumference * (1 - timeRatio);
+            
+            // 根据剩余时间比例计算颜色
+            // 从绿色(#00FF00)过渡到黄色(#FFFF00)再到红色(#FF0000)
+            let color;
+            if (timeRatio > 0.6) {
+                // 从绿色到黄色的过渡 (60%-100%)
+                const greenToYellowRatio = (timeRatio - 0.6) / 0.4;
+                const r = Math.floor(255 * (1 - greenToYellowRatio));
+                color = `rgb(${r}, 255, 0)`;
+            } else {
+                // 从黄色到红色的过渡 (0%-60%)
+                const yellowToRedRatio = timeRatio / 0.6;
+                const g = Math.floor(255 * yellowToRedRatio);
+                color = `rgb(255, ${g}, 0)`;
+            }
+            
+            progressCircle.setAttribute("stroke", color);
+            
+            // 设置虚线属性来显示进度
+            progressCircle.setAttribute("stroke-dasharray", circumference);
+            progressCircle.setAttribute("stroke-dashoffset", dashOffset);
+            progressCircle.setAttribute("transform", "rotate(-90, 25, 25)"); // 从顶部开始
+            
+            // 添加元素到SVG
+            svg.appendChild(bgCircle);
+            svg.appendChild(progressCircle);
+            
+            // 添加图标和进度条到显示区域
+            this.powerupStatusDisplay.appendChild(svg);
+            this.powerupStatusDisplay.appendChild(iconElement);
         }
     }    updatePauseButtonText() {
             // 使用图片替换文本
