@@ -113,9 +113,8 @@ class Game {    constructor(canvasId) {
         }
 
         // 设置管道生成
-        this.pipeSpawnTimer = 0;
+        this.pipeSpawnTimer = -this.currentDifficultySettings.initialPipeDelay; // 使用难度设置中的初始延迟
         this.setNextPipeSpawnInterval();
-        this.spawnPipePair();
 
         // 设置输入监听
         this.setupInputListeners();
@@ -192,7 +191,8 @@ class Game {    constructor(canvasId) {
 
     setNextPipeSpawnInterval() {
         this.nextPipeSpawnInterval = Math.random() * 
-            (PIPE_SPAWN_INTERVAL_MAX - PIPE_SPAWN_INTERVAL_MIN) + PIPE_SPAWN_INTERVAL_MIN;
+            (this.currentDifficultySettings.pipeSpawnIntervalMax - this.currentDifficultySettings.pipeSpawnIntervalMin) 
+            + this.currentDifficultySettings.pipeSpawnIntervalMin;
     }
 
     spawnPipePair() {
