@@ -50,21 +50,74 @@ class Pipe {
     }
 
     draw(ctx) {
+        // 为上下管道统一使用顶部管道图像 (pipe_top.png)
+        const pipeImg = this.imageTop;
+        const capHeight = 26;  // 管道头部的固定高度
+        
+        if (!pipeImg.complete) {
+            // 如果图片未加载，使用绿色矩形作为后备
+            ctx.fillStyle = 'green';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            return;
+        }
+        
+        ctx.save();
+        
         if (this.isTopPipe) {
-            if (this.imageTop.complete) {
-                ctx.drawImage(this.imageTop, this.x, this.y, this.width, this.height);
+            // 顶部管道绘制
+            // 1. 主要部分（可拉伸）
+            if (this.height > capHeight) {
+                ctx.drawImage(
+                    pipeImg,
+                    0, 0, pipeImg.width, pipeImg.height - capHeight,  // 源图像截取
+                    this.x, this.y, this.width, this.height - capHeight  // 目标位置大小
+                );
+                
+                // 2. 管道末端（固定尺寸，位于底部）
+                ctx.drawImage(
+                    pipeImg,
+                    0, pipeImg.height - capHeight, pipeImg.width, capHeight,  // 源图像截取
+                    this.x, this.y + this.height - capHeight, this.width, capHeight  // 目标位置大小
+                );
             } else {
-                ctx.fillStyle = 'green'; // Fallback
-                ctx.fillRect(this.x, this.y, this.width, this.height);
+                // 如果管道太短，只绘制末端部分
+                ctx.drawImage(
+                    pipeImg,
+                    0, pipeImg.height - capHeight, pipeImg.width, capHeight,
+                    this.x, this.y, this.width, this.height
+                );
             }
         } else {
-            if (this.imageBottom.complete) {
-                ctx.drawImage(this.imageBottom, this.x, this.y, this.width, this.height);
+            // 底部管道绘制 - 使用相同的顶部图像，但翻转
+            ctx.translate(this.x + this.width/2, this.y + this.height/2);
+            ctx.rotate(Math.PI);
+            ctx.translate(-this.width/2, -this.height/2);
+            
+            // 1. 主要部分（可拉伸）
+            if (this.height > capHeight) {
+                ctx.drawImage(
+                    pipeImg,
+                    0, 0, pipeImg.width, pipeImg.height - capHeight,  // 源图像截取
+                    0, 0, this.width, this.height - capHeight  // 目标位置大小
+                );
+                
+                // 2. 管道末端（固定尺寸，位于底部在翻转的坐标系中）
+                ctx.drawImage(
+                    pipeImg,
+                    0, pipeImg.height - capHeight, pipeImg.width, capHeight,  // 源图像截取
+                    0, this.height - capHeight, this.width, capHeight  // 目标位置大小
+                );
             } else {
-                ctx.fillStyle = 'green'; // Fallback
-                ctx.fillRect(this.x, this.y, this.width, this.height);
+                // 如果管道太短，只绘制末端部分
+                ctx.drawImage(
+                    pipeImg,
+                    0, pipeImg.height - capHeight, pipeImg.width, capHeight,
+                    0, 0, this.width, this.height
+                );
             }
         }
+        
+        ctx.restore();
     }
 
     isOffscreen() {

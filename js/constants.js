@@ -21,7 +21,7 @@ const PIPE_SPAWN_INTERVAL_MAX = 2500; // ms, max time between new pipe spawns
 
 // Coin properties
 const COIN_SIZE = 40; // Diameter for a round coin, or width/height for square
-const COIN_GOLD_VALUE = 5;
+const COIN_GOLD_VALUE = 2;
 const COIN_SILVER_VALUE = 1;
 const COIN_SPAWN_CHANCE = 0.8; // 提高到80%的概率生成金币
 
@@ -85,8 +85,7 @@ const GAME_STATE = {
 
 // Asset paths (placeholders, update with actual paths/names)
 const ASSETS = {
-    pipeTop: 'assets/pipe_top.png',
-    pipeBottom: 'assets/pipe_bottom.png',
+    pipeTop: 'assets/pipe.png',
     background: 'assets/background.png',
     powerupShield: 'assets/powerup_shield.png',
     powerupMagnet: 'assets/powerup_magnet.png',
