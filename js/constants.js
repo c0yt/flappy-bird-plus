@@ -1,5 +1,4 @@
-// js/constants.js - 游戏常量配置文件
-
+// js/constants.js - 游戏常量配置文件 
 // 画布尺寸设置
 const CANVAS_WIDTH = 320;  // 像素艺术游戏的典型宽度，适合移动设备
 const CANVAS_HEIGHT = 480; // 竖屏手机游戏的典型高度，保持16:9比例
