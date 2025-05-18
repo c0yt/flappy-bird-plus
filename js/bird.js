@@ -70,6 +70,10 @@ class Bird {
         if (this.y < 0) {
             this.y = 0;
             this.velocity = 0;
+            // 添加碰到上边界的游戏结束逻辑
+            if (!this.isShieldActive) {
+                this.game.gameOver();
+            }
         }
         if (this.y + this.height > CANVAS_HEIGHT) {
             this.y = CANVAS_HEIGHT - this.height;
