@@ -62,7 +62,7 @@ const DIFFICULTIES = {
         secondCollectibleChance: 0.7,    // 简单模式下70%概率生成第二个收集物
         thirdCollectibleChance: 0.4,     // 简单模式下40%概率生成第三个收集物
         branchSpawnChance: 0.05,         // 简单模式下5%概率生成树枝障碍物
-        smokeSpawnChance: 0.05,          // 简单模式下5%概率生成烟雾道具
+        smokeSpawnChance: 0.10,          // 简单模式下5%概率生成烟雾道具
     },
     // 普通难度 - 适合熟练玩家
     normal: {
