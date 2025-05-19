@@ -1,0 +1,321 @@
+/* css/style.css - 游戏样式表 */
+
+/* 页面基础样式 */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #333;
+    font-family: 'Press Start 2P', cursive; /* 使用像素风格字体，需要提前引入 */
+    overflow: hidden; /* 防止出现滚动条 */
+}
+
+/* 游戏容器样式 */
+#game-container {
+    position: relative;
+    border: 3px solid #000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5); /* 添加阴影效果 */
+    background-color: #70c5ce; /* 天蓝色背景，类似原版Flappy Bird */
+    overflow: hidden; /* 确保超出容器的内容不可见 */
+}
+
+/* 游戏画布样式 */
+#game-canvas {
+    display: block; /* 消除画布底部的额外空间 */
+    background-image: url('../assets/background.png');
+    background-repeat: repeat-x; /* 背景图片水平重复 */
+    background-size: contain; /* 背景图片自适应容器大小 */
+}
+
+/* 游戏界面层样式 */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.7); /* 半透明黑色遮罩 */
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 游戏标题容器样式 */
+.game-title {
+    margin-bottom: 15px; /* 进一步减小底部间距 */
+    animation: float 2s ease-in-out infinite; /* 添加浮动动画 */
+}
+
+/* 游戏标题图片样式 */
+#title-image {
+    max-width: 180px; /* 增加最大宽度到180px */
+    height: auto;
+}
+
+/* 标题浮动动画 */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* 游戏副标题样式 */
+.screen h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px #000;
+}
+
+/* 游戏文本样式 */
+.screen p {
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+/* 游戏按钮通用样式 */
+.screen button {
+    font-family: inherit; /* 继承像素字体 */
+    font-size: 1em;
+    padding: 10px 20px;
+    margin: 10px;
+    border: 2px solid #fff;
+    background-color: #555;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 2px 2px #000;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+/* 按钮悬停效果 */
+.screen button:hover {
+    background-color: #777;
+}
+
+/* 按钮点击效果 */
+.screen button:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+/* 难度选择界面样式 */
+#difficulty-selection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 12px 0;  /* 调整与标题的间距 */
+}
+
+#difficulty-selection p {
+    margin-bottom: 6px;
+    font-size: 0.75em;
+    color: #fff;
+    text-shadow: 1px 1px #000;
+    animation: floatText 2s ease-in-out infinite;
+}
+
+@keyframes floatText {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+/* 难度选择按钮容器 */
+.difficulty-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;  /* 保持按钮之间的间距 */
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+}
+
+/* 难度选择按钮特殊样式 */
+.difficulty-btn {
+    width: 90px;
+    height: 30px;
+    padding: 0 !important;
+    border: none !important;
+    background-color: transparent !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    box-shadow: none !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    filter: brightness(0.85);
+    transform-origin: center;
+    animation: buttonFloat 3s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+#easy-btn { 
+    --delay: 0s; 
+    background-image: url('../assets/btn_easy.png') !important;
+}
+
+#normal-btn { 
+    --delay: 0.2s; 
+    background-image: url('../assets/btn_normal.png') !important;
+}
+
+#hard-btn { 
+    --delay: 0.4s; 
+    background-image: url('../assets/btn_hard.png') !important;
+}
+
+@keyframes buttonFloat {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+}
+
+.difficulty-btn:hover {
+    transform: scale(1.08) translateX(4px);
+    filter: brightness(1.2);
+    animation: none;
+}
+
+.difficulty-btn:active {
+    transform: scale(0.95) translateX(-2px);
+    filter: brightness(1);
+}
+
+/* 选中状态的按钮样式 */
+.difficulty-btn.selected {
+    filter: brightness(1.3);
+    animation: selectedPulse 2s infinite;
+}
+
+@keyframes selectedPulse {
+    0% { transform: scale(1.06) translateX(0); filter: brightness(1.3); }
+    50% { transform: scale(1.1) translateX(3px); filter: brightness(1.4); }
+    100% { transform: scale(1.06) translateX(0); filter: brightness(1.3); }
+}
+
+/* 开始游戏按钮样式 */
+#start-game-btn {
+    margin-top: 15px;
+    width: 100px;  /* 与难度按钮相同宽度 */
+    height: 35px;  /* 与难度按钮相同高度 */
+    padding: 0 !important;
+    border: none !important;
+    background-color: transparent !important;
+    background-image: url('../assets/btn_start.png') !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    box-shadow: none !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    filter: brightness(0.85);
+    animation: startBtnFloat 3s ease-in-out infinite;
+}
+
+@keyframes startBtnFloat {
+    0%, 100% { 
+        transform: translateY(0); 
+        filter: brightness(0.85);
+    }
+    50% { 
+        transform: translateY(-3px); 
+        filter: brightness(1);
+    }
+}
+
+#start-game-btn:hover {
+    transform: scale(1.08) translateY(-2px);
+    filter: brightness(1.2);
+    animation: none;
+}
+
+#start-game-btn:active {
+    transform: scale(0.95);
+    filter: brightness(1);
+}
+
+#start-game-btn.disabled {
+    filter: brightness(0.5);
+    animation: none;
+    pointer-events: none;
+}
+
+/* 游戏控制按钮样式 */
+.game-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 8px 16px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid #333;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1000; /* 确保按钮显示在最上层 */
+    pointer-events: auto; /* 允许点击事件 */
+}
+
+/* 游戏按钮悬停效果 */
+.game-button:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+/* 游戏UI界面样式 */
+#game-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-size: 1.2em;
+    text-shadow: 1px 1px #000;
+    z-index: 100;
+}
+
+/* 道具状态显示样式 */
+#powerup-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: white;
+    text-shadow: 1px 1px #000;
+}
+
+/* 道具图标样式 */
+.powerup-icon {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    z-index: 2;
+}
+
+/* 道具计时器样式 */
+.powerup-timer {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    z-index: 1;
+}
+
+/* 隐藏元素样式 */
+.hidden {
+    display: none !important;
+}
+
+/* Add more specific styles for bird, pipes, coins, powerups later */
+
