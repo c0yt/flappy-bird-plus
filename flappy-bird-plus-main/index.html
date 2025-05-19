@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素鸟++</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+
+        <div id="start-screen" class="screen">
+            <div class="game-title">
+                <img src="assets/title.png" alt="像素鸟++" id="title-image">
+            </div>
+            <div id="difficulty-selection">
+                <div class="difficulty-buttons">
+                    <button id="easy-btn" class="difficulty-btn" data-difficulty="easy"></button>
+                    <button id="normal-btn" class="difficulty-btn" data-difficulty="normal"></button>
+                    <button id="hard-btn" class="difficulty-btn" data-difficulty="hard"></button>
+                </div>
+            </div>
+            <button id="start-game-btn" class="image-btn"></button>
+        </div>
+
+        <div id="game-ui" class="hidden">
+            <button id="pause-btn" class="game-button">暂停</button>
+            <div id="powerup-status"></div>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h2>游戏结束</h2>
+            <p id="final-score">你的得分: 0</p>
+            <p id="high-score">最高分: 0</p>
+            <button id="restart-game-btn">重新开始</button>
+            <button id="main-menu-btn">返回主菜单</button>
+        </div>
+    </div>
+
+    <script src="js/constants.js"></script>
+    <script src="js/collision.js"></script>
+    <script src="js/bird.js"></script>
+    <script src="js/coin.js"></script>
+    <script src="js/pipe.js"></script>
+    <script src="js/powerup.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
