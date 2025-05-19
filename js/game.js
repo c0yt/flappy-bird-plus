@@ -27,6 +27,12 @@ class Game {    constructor(canvasId) {
         this.isDoubleScoreActive = false;
         this.doubleScoreEndTime = 0;
         this.currentSpeedMultiplier = 1.0; // For shield speed boost
+        
+        // 添加烟雾效果相关属性
+        this.isSmokeActive = false;
+        this.smokeEndTime = 0;
+        this.smokeOverlayImage = new Image();
+        this.smokeOverlayImage.src = ASSETS.smokeOverlay;
 
         this.lastTime = performance.now();
         this.animationFrameId = null;
@@ -318,21 +324,114 @@ class Game {    constructor(canvasId) {
     }
 
     spawnPipePair() {
-        const x = CANVAS_WIDTH;
-        const newPipePair = new PipePair(this, x);
-        this.pipes.push(newPipePair);
+        // 使用当前难度设置中的概率参数
+        const collectibleOnlyChance = this.currentDifficultySettings.collectibleOnlyChance || COLLECTIBLE_ONLY_CHANCE;
+        const secondCollectibleChance = this.currentDifficultySettings.secondCollectibleChance || SECOND_COLLECTIBLE_CHANCE;
+        const thirdCollectibleChance = this.currentDifficultySettings.thirdCollectibleChance || THIRD_COLLECTIBLE_CHANCE;
+        const branchSpawnChance = this.currentDifficultySettings.branchSpawnChance || BRANCH_SPAWN_CHANCE;
+        const smokeSpawnChance = this.currentDifficultySettings.smokeSpawnChance || SMOKE_SPAWN_CHANCE;
+
+        // 根据难度设置的概率决定是否只生成收集物
+        const onlySpawnCollectible = Math.random() < collectibleOnlyChance;
+        
+        let x = CANVAS_WIDTH;
+        let spawnY = CANVAS_HEIGHT / 2; // 默认值，如果不生成管道则用于道具/金币的生成位置
+        let secondSpawnY = null;
+        
+        // 如果不是只生成收集物，则生成管道对
+        if (!onlySpawnCollectible) {
+            const newPipePair = new PipePair(this, x);
+            this.pipes.push(newPipePair);
+            spawnY = newPipePair.holeY; // 使用管道空隙的位置
+        } else {
+            // 如果只生成收集物，随机决定Y位置
+            spawnY = Math.random() * (CANVAS_HEIGHT - 200) + 100; // 避免太靠近屏幕边缘
+            
+            // 检查是否生成树枝障碍物（只在没有管道的情况下生成）
+            if (Math.random() < branchSpawnChance) {
+                this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, spawnY, "branch"));
+            }
+            // 检查是否生成烟雾道具（只在没有管道的情况下生成）
+            else if (Math.random() < smokeSpawnChance) {
+                this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, spawnY, "smoke"));
+            }
+            // 否则生成常规收集物
+            else {
+                // 生成第二个收集物的逻辑
+                if (Math.random() < secondCollectibleChance) {
+                    // 随机决定在第一个收集物上方或下方
+                    const isAbove = Math.random() < 0.5;
+                    const verticalDistance = Math.random() * 100 + 200; // 100-300像素的垂直距离
+                    
+                    if (isAbove) {
+                        secondSpawnY = Math.max(70, spawnY - verticalDistance); // 确保不超出屏幕顶部
+                    } else {
+                        secondSpawnY = Math.min(CANVAS_HEIGHT - 70, spawnY + verticalDistance); // 确保不超出屏幕底部
+                    }
+                    
+                    // 随机决定生成金币或道具
+                    if (Math.random() < 0.5) {
+                        // 生成金币
+                        const type = Math.random() < 0.3 ? 'gold' : 'silver';
+                        this.coins.push(new Coin(this, x + PIPE_WIDTH/2, secondSpawnY, type));
+                    } else {
+                        // 生成常规道具（不包括树枝和烟雾）
+                        const powerupTypes = ["shield", "magnet", "doubleScore"];
+                        const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                        this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, secondSpawnY, type));
+                    }
+                    
+                    // 生成第三个收集物的逻辑
+                    if (secondSpawnY && Math.random() < thirdCollectibleChance) {
+                        // 确定第三个收集物的位置
+                        // 如果前两个是上下排列，那么第三个放在中间
+                        // 如果前两个是在同一高度，那么第三个放在不同高度
+                        let thirdSpawnY;
+                        
+                        if (Math.abs(spawnY - secondSpawnY) > 100) {
+                            // 前两个收集物距离较远，第三个放中间
+                            thirdSpawnY = (spawnY + secondSpawnY) / 2;
+                        } else {
+                            // 前两个收集物较近，第三个错开放置
+                            // 随机决定在最高的上方还是最低的下方
+                            const minY = Math.min(spawnY, secondSpawnY);
+                            const maxY = Math.max(spawnY, secondSpawnY);
+                            const placeAbove = Math.random() < 0.5;
+                            
+                            if (placeAbove) {
+                                thirdSpawnY = Math.max(50, minY - (Math.random() * 80 + 70)); // 放在上方
+                            } else {
+                                thirdSpawnY = Math.min(CANVAS_HEIGHT - 50, maxY + (Math.random() * 80 + 70)); // 放在下方
+                            }
+                        }
+                        
+                        // 随机决定生成金币或道具
+                        if (Math.random() < 0.5) {
+                            // 生成金币
+                            const type = Math.random() < 0.3 ? 'gold' : 'silver';
+                            this.coins.push(new Coin(this, x + PIPE_WIDTH/2, thirdSpawnY, type));
+                        } else {
+                            // 生成常规道具（不包括树枝和烟雾）
+                            const powerupTypes = ["shield", "magnet", "doubleScore"];
+                            const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                            this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, thirdSpawnY, type));
+                        }
+                    }
+                }
+            }
+        }
 
         // 优先判断是否生成金币
-        if (Math.random() < COIN_SPAWN_CHANCE) {
+        if (Math.random() < COIN_SPAWN_CHANCE || onlySpawnCollectible) {
             const type = Math.random() < 0.3 ? 'gold' : 'silver';
-            const spawnY = newPipePair.holeY; // 在管道空隙中间生成
             this.coins.push(new Coin(this, x + PIPE_WIDTH/2, spawnY, type));
         }
         // 如果没有生成金币，则考虑生成道具
-        else if (Math.random() < POWERUP_SPAWN_CHANCE) {
+        else if (Math.random() < POWERUP_SPAWN_CHANCE || onlySpawnCollectible) {
+            // 只生成常规道具，不包括树枝和烟雾（它们已在上面专门处理）
             const powerupTypes = ["shield", "magnet", "doubleScore"];
             const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-            this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, newPipePair.holeY, type));
+            this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, spawnY, type));
         }
     }
 
@@ -472,6 +571,17 @@ class Game {    constructor(canvasId) {
         this.ui.updatePowerupStatus("", 0);
     }
 
+    activateSmoke(duration) {
+        this.isSmokeActive = true;
+        this.smokeEndTime = Date.now() + duration;
+        this.ui.updatePowerupStatus("烟雾", duration / 1000);
+    }
+
+    deactivateSmoke() {
+        this.isSmokeActive = false;
+        this.ui.updatePowerupStatus("", 0);
+    }
+
     handleActivePowerUps(deltaTime) {
         // 检查磁铁状态
         if (this.isMagnetActive && Date.now() > this.magnetEndTime) {
@@ -481,6 +591,11 @@ class Game {    constructor(canvasId) {
         // 检查双倍得分状态
         if (this.isDoubleScoreActive && Date.now() > this.doubleScoreEndTime) {
             this.deactivateDoubleScore();
+        }
+        
+        // 检查烟雾状态
+        if (this.isSmokeActive && Date.now() > this.smokeEndTime) {
+            this.deactivateSmoke();
         }
         
         // 检查护盾状态
@@ -498,6 +613,8 @@ class Game {    constructor(canvasId) {
             this.ui.updatePowerupStatus("磁铁", (this.magnetEndTime - Date.now()) / 1000);
         } else if (this.isDoubleScoreActive) {
             this.ui.updatePowerupStatus("双倍得分", (this.doubleScoreEndTime - Date.now()) / 1000);
+        } else if (this.isSmokeActive) {
+            this.ui.updatePowerupStatus("烟雾", (this.smokeEndTime - Date.now()) / 1000);
         } else {
             this.ui.updatePowerupStatus("", 0);
         }
@@ -633,6 +750,22 @@ class Game {    constructor(canvasId) {
                     const startY = y + HELP_IMAGE_HEIGHT + 20; // 在帮助图片下方20像素
                     this.ctx.drawImage(startImage, startX, startY, startWidth, startHeight);
                 }
+            }
+        }
+
+        // 在所有游戏元素绘制完成后，如果烟雾效果激活，绘制烟雾遮罩
+        if (this.isSmokeActive) {
+            if (this.smokeOverlayImage && this.smokeOverlayImage.complete) {
+                // 设置半透明效果
+                this.ctx.globalAlpha = 0.7;
+                // 绘制烟雾遮罩
+                this.ctx.drawImage(this.smokeOverlayImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                // 恢复透明度
+                this.ctx.globalAlpha = 1.0;
+            } else {
+                // 如果图片未加载，使用灰色半透明矩形作为后备
+                this.ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+                this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             }
         }
     }    pauseGame() {

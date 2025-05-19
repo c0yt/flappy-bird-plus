@@ -32,48 +32,75 @@ const SHIELD_SPEED_BOOST = 1.2;   // 护盾状态下速度提升20%
 const MAGNET_RADIUS = 200;        // 磁铁吸引范围（像素）
 const MAGNET_STRENGTH = 5;        // 磁铁吸引力度，影响金币被吸引的速度
 
+// 新增特殊道具属性设置
+const SMOKE_DURATION = 3000;       // 烟雾效果持续时间（3秒）
+const BRANCH_SIZE = 45;            // 树枝道具的大小
+const SMOKE_SIZE = 50;             // 烟雾道具的大小
+const BRANCH_SPAWN_CHANCE = 0.15;  // 树枝生成基础概率（15%）
+const SMOKE_SPAWN_CHANCE = 0.15;   // 烟雾生成基础概率（15%）
+
+// 收集物生成概率设置（默认值，会被难度设置中的值覆盖）
+const COLLECTIBLE_ONLY_CHANCE = 0.3;      // 只生成收集物而不生成管道的概率（30%）
+const SECOND_COLLECTIBLE_CHANCE = 0.6;    // 生成第二个收集物的概率（60%）
+const THIRD_COLLECTIBLE_CHANCE = 0.3;     // 生成第三个收集物的概率（30%）
+
 // 难度设置 - 包含三个难度级别的具体参数
 const DIFFICULTIES = {
     // 简单难度 - 适合新手玩家
     easy: {
-        pipeSpeed: 1.5,              // 管道移动速度较慢
-        pipeVerticalMove: 0,         // 管道不会上下移动
-        pipeHorizontalGap: 250,      // 管道之间的水平间距较大
+        pipeSpeed: 1.0,              // 管道移动速度较慢
+        //pipeVerticalMove: 0,         // 管道不会上下移动
+        //pipeHorizontalGap: 250,      // 管道之间的水平间距较大
         pipeVerticalGapMin: 140,     // 管道垂直间隙最小值
         pipeVerticalGapMax: 180,     // 管道垂直间隙最大值
         birdFlapPower: -5.5,         // 跳跃力度较大，更容易控制
         gravity: 0.22,               // 重力较小
         pipeSpawnIntervalMin: 2500,  // 管道生成间隔较长
         pipeSpawnIntervalMax: 3500,
-        initialPipeDelay: 1500,      // 开局等待1.5秒再生成管道
+        initialPipeDelay: 100,      // 开局等待0.1秒再生成管道
+        collectibleOnlyChance: 0.3,      // 简单模式下30%概率只生成收集物
+        secondCollectibleChance: 0.7,    // 简单模式下70%概率生成第二个收集物
+        thirdCollectibleChance: 0.4,     // 简单模式下40%概率生成第三个收集物
+        branchSpawnChance: 0.05,         // 简单模式下5%概率生成树枝障碍物
+        smokeSpawnChance: 0.05,          // 简单模式下5%概率生成烟雾道具
     },
     // 普通难度 - 适合熟练玩家
     normal: {
-        pipeSpeed: 2.0,              // 中等管道速度
-        pipeVerticalMove: 0.5,       // 管道会缓慢上下移动
-        pipeVerticalMoveSpeed: 0.01, // 管道垂直移动速度
-        pipeHorizontalGap: 200,      // 中等管道间距
+        pipeSpeed: 1.5,              // 中等管道速度
+        //pipeVerticalMove: 0.5,       // 管道会缓慢上下移动
+        //pipeVerticalMoveSpeed: 0.01, // 管道垂直移动速度
+       // pipeHorizontalGap: 200,      // 中等管道间距
         pipeVerticalGapMin: PIPE_HOLE_MIN,
         pipeVerticalGapMax: PIPE_HOLE_MAX,
         birdFlapPower: BIRD_FLAP_POWER,
         gravity: GRAVITY,
         pipeSpawnIntervalMin: PIPE_SPAWN_INTERVAL_MIN,
         pipeSpawnIntervalMax: PIPE_SPAWN_INTERVAL_MAX,
-        initialPipeDelay: 1000,      // 开局等待1秒再生成管道
+        initialPipeDelay: 100,      // 开局等待0.1秒再生成管道
+        collectibleOnlyChance: 0.3,      // 普通模式下30%概率只生成收集物
+        secondCollectibleChance: 0.6,    // 普通模式下60%概率生成第二个收集物
+        thirdCollectibleChance: 0.3,     // 普通模式下30%概率生成第三个收集物
+        branchSpawnChance: 0.15,         // 普通模式下15%概率生成树枝障碍物
+        smokeSpawnChance: 0.15,          // 普通模式下15%概率生成烟雾道具
     },
     // 困难难度 - 适合挑战玩家
     hard: {
-        pipeSpeed: 2.8,              // 管道移动速度快
-        pipeVerticalMove: 1.0,       // 管道上下移动幅度大
-        pipeVerticalMoveSpeed: 0.02, // 管道垂直移动速度快
-        pipeHorizontalGap: 250,      // 管道间距较小
+        pipeSpeed: 1.8,              // 管道移动速度快
+        //pipeVerticalMove: 1.0,       // 管道上下移动幅度大
+        //pipeVerticalMoveSpeed: 0.02, // 管道垂直移动速度快
+        //pipeHorizontalGap: 250,      // 管道间距较小
         pipeVerticalGapMin: 90,      // 管道垂直间隙小
         pipeVerticalGapMax: 120,
         birdFlapPower: -4.5,         // 跳跃力度小，难以控制
         gravity: 0.28,               // 重力大
         pipeSpawnIntervalMin: 1000,  // 管道生成间隔短
         pipeSpawnIntervalMax: 2000,
-        initialPipeDelay: 1500,      // 开局等待1.5秒再生成管道
+        initialPipeDelay: 100,      // 开局等待0.1秒再生成管道
+        collectibleOnlyChance: 0.3,      // 困难模式下30%概率只生成收集物
+        secondCollectibleChance: 0.7,    // 困难模式下70%概率生成第二个收集物
+        thirdCollectibleChance: 0.5,     // 困难模式下50%概率生成第三个收集物
+        branchSpawnChance: 0.35,         // 困难模式下35%概率生成树枝障碍物
+        smokeSpawnChance: 0.25,          // 困难模式下25%概率生成烟雾道具
     }
 };
 
@@ -96,6 +123,11 @@ const ASSETS = {
     powerupShield: 'assets/powerup_shield.png',
     powerupMagnet: 'assets/powerup_magnet.png',
     powerupDoubleScore: 'assets/powerup_doublescore.png',
+    
+    // 新增特殊道具图片资源
+    powerupBranch: 'assets/powerup_branch.png',   // 树枝障碍物图片
+    powerupSmoke: 'assets/powerup_smoke.png',     // 烟雾道具图片
+    smokeOverlay: 'assets/smoke_overlay.png',     // 烟雾遮罩图片
     
     // 小鸟动画帧
     bird1: './assets/bird1.png',
