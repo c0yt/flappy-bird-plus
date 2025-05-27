@@ -656,7 +656,6 @@ class Game {
             startX += SCORE_NUMBER_WIDTH + SCORE_PADDING;
         }
     }
-    // 删除这里的多余右大括号
 
     update(deltaTime) {
         // 在等待开始状态下，只更新小鸟的动画
@@ -784,6 +783,31 @@ class Game {
                     this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
                 }
             }
+        }
+    }
+
+    resumeGame() {
+        console.log("Resuming game...");
+        if (this.gameState === GAME_STATE.PAUSED) {
+            // 移除暂停时的点击监听器
+            document.addEventListener("keydown", this.ctrlKeyHandler);
+            this.resumeHandler = null;
+            
+            this.gameState = GAME_STATE.PLAYING;
+            this.lastTime = performance.now();
+            this.ui.updatePauseButtonText();
+            
+            // 清除可能残留的动画帧
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            
+            // 重新设置输入监听
+            this.setupInputListeners();
+            
+            // 重置时间基准并启动新的游戏循环
+            this.lastTime = performance.now();
+            this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
         }
     }
 
