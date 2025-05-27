@@ -1,6 +1,7 @@
 // js/game.js
 
-class Game {    constructor(canvasId) {
+class Game {
+    constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.canvas.width = CANVAS_WIDTH;
@@ -12,6 +13,9 @@ class Game {    constructor(canvasId) {
         this.pipes = [];
         this.coins = [];  // 保留金币数组
         this.powerUps = [];
+        
+        // 检测设备性能
+        this.isLowEndDevice = this.detectLowEndDevice();
         
         // 在设置完基本属性后再创建UI实例
         this.ui = new UI(this);
@@ -95,7 +99,9 @@ class Game {    constructor(canvasId) {
             this.currentDifficultySettings = {...DIFFICULTIES.normal}; // 使用深拷贝
         }
         console.log("Difficulty set to:", difficultyKey, this.currentDifficultySettings);
-    }    // 在startGame方法中设置isWaitingForStart为true
+    }
+    
+    // 在startGame方法中设置isWaitingForStart为true
     startGame() {
         if (!this.currentDifficultySettings) {
             console.error("No difficulty settings found!");
@@ -280,7 +286,7 @@ class Game {    constructor(canvasId) {
         if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
         document.removeEventListener("click", this.inputHandler);
         document.removeEventListener("keydown", this.inputHandler);
-        document.removeEventListener("keydown", this.pauseResumeHandler); // 删除Ctrl键监听
+        document.removeEventListener("keydown", this.ctrlKeyHandler); // 删除Ctrl键监听
         this.startGame(); // Will re-select current difficulty and start
     }
 
@@ -547,7 +553,7 @@ class Game {    constructor(canvasId) {
                 this.score += value;  // 直接加入总分
             }
         }
-    }  // 确保方法正确闭合
+    }
 
     activateMagnet(duration) {
         this.isMagnetActive = true;
@@ -649,7 +655,10 @@ class Game {    constructor(canvasId) {
             }
             startX += SCORE_NUMBER_WIDTH + SCORE_PADDING;
         }
-    }    update(deltaTime) {
+    }
+    // 删除这里的多余右大括号
+
+    update(deltaTime) {
         // 在等待开始状态下，只更新小鸟的动画
         if (this.isWaitingForStart) {
             if (this.bird) {
@@ -753,110 +762,50 @@ class Game {    constructor(canvasId) {
             }
         }
 
-        // 在所有游戏元素绘制完成后，如果烟雾效果激活，绘制烟雾遮罩
-        if (this.isSmokeActive) {
-            if (this.smokeOverlayImage && this.smokeOverlayImage.complete) {
-                // 设置半透明效果
-                this.ctx.globalAlpha = 0.7;
-                // 绘制烟雾遮罩
-                this.ctx.drawImage(this.smokeOverlayImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-                // 恢复透明度
-                this.ctx.globalAlpha = 1.0;
-            } else {
-                // 如果图片未加载，使用灰色半透明矩形作为后备
-                this.ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+        // 根据设备性能调整渲染
+        if (this.isLowEndDevice) {
+            // 简化渲染，例如减少粒子效果、使用更简单的动画等
+            // 例如，可以跳过某些视觉效果的渲染
+            if (this.isSmokeActive) {
+                // 使用更简单的烟雾效果
+                this.ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
                 this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             }
+        } else {
+            // 完整渲染
+            if (this.isSmokeActive) {
+                if (this.smokeOverlayImage && this.smokeOverlayImage.complete) {
+                    this.ctx.globalAlpha = 0.7;
+                    this.ctx.drawImage(this.smokeOverlayImage, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                    this.ctx.globalAlpha = 1.0;
+                } else {
+                    // 如果图片未加载，使用灰色半透明矩形作为后备
+                    this.ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+                    this.ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                }
+            }
         }
-    }    pauseGame() {
-            console.log("Pausing game...");
-            if (this.gameState === GAME_STATE.PLAYING) {
-                this.gameState = GAME_STATE.PAUSED;
-                // 移除游戏中的点击事件处理器
-                document.removeEventListener("click", this.inputHandler);
-                document.removeEventListener("keydown", this.inputHandler);
-                
-                // 保留Ctrl键监听器用于恢复游戏
-                
-                // 彻底停止游戏循环
-                if (this.animationFrameId) {
-                    cancelAnimationFrame(this.animationFrameId);
-                    this.animationFrameId = null;
-                }
-                
-                // 保留当前游戏状态
-                this.lastTime = performance.now();
-                
-                // 更新UI状态
-                this.ui.updatePauseButtonText();
-                
-                // 绘制暂停界面
-                this.drawPausedState();
-                
-                // 添加画布点击恢复监听
-                this.resumeHandler = (e) => {
-                    if (this.gameState === GAME_STATE.PAUSED) {
-                        this.resumeGame();
-                    }
-                };
-                
-                // 使用捕获阶段来确保这个事件处理器最先执行
-                document.addEventListener("click", this.resumeHandler, true);
-            }
-    }    resumeGame() {
-            console.log("Resuming game...");
-            if (this.gameState === GAME_STATE.PAUSED) {
-                // 移除暂停时的点击监听器
-                document.addEventListener("keydown", this.ctrlKeyHandler);
-                this.resumeHandler = null;
-                
-                this.gameState = GAME_STATE.PLAYING;
-                this.lastTime = performance.now();
-                this.ui.updatePauseButtonText();
-                
-                // 清除可能残留的动画帧
-                if (this.animationFrameId) {
-                    cancelAnimationFrame(this.animationFrameId);
-                }
-                
-                // 重新设置输入监听
-                this.setupInputListeners();
-                
-                // 重置时间基准并启动新的游戏循环
-                this.lastTime = performance.now();
-                this.animationFrameId = requestAnimationFrame((time) => this.gameLoop(time));
-            }
     }
 
-    drawPausedState() {
-        console.log("Drawing paused state..."); // 调试日志
-        this.ctx.save();
+    detectLowEndDevice() {
+        // 检测设备性能
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // 用黑白滤镜重绘当前画面
-        this.ctx.filter = 'grayscale(100%)';
-        this.draw();
-        
-        // 添加半透明黑色遮罩
-        this.ctx.filter = 'none';
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // 绘制提示图片
-        if (this.helpImage && this.helpImage.complete) {
-            const x = (CANVAS_WIDTH - HELP_IMAGE_WIDTH) / 2;
-            const y = (CANVAS_HEIGHT - HELP_IMAGE_HEIGHT) / 2;
-            this.ctx.drawImage(this.helpImage, x, y, HELP_IMAGE_WIDTH, HELP_IMAGE_HEIGHT);
+        // 如果是移动设备，进一步检测性能
+        if (isMobile) {
+            // 检测设备内存（如果可用）
+            if (navigator.deviceMemory && navigator.deviceMemory < 4) {
+                return true; // 低于4GB内存认为是低端设备
+            }
             
-            // 绘制文字
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 24px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('Tap to continue', CANVAS_WIDTH / 2, y + HELP_IMAGE_HEIGHT + 30);
+            // 检测处理器核心数（如果可用）
+            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
+                return true; // 低于4核认为是低端设备
+            }
         }
         
-        this.ctx.restore();
+        return false;
     }
-    
 }
 
 // Initialize the game once the DOM is ready
