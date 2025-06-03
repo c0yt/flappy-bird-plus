@@ -44,7 +44,7 @@ class PowerUp {
                 break;
             case 'smoke': // 新增烟雾道具
                 this.size = SMOKE_SIZE;
-                this.image = new Image();
+                this.image = new Image(350,200);
                 this.image.src = ASSETS.powerupSmoke;
                 this.duration = SMOKE_DURATION; // 烟雾效果持续时间
                 break;
