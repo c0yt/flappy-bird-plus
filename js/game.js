@@ -350,8 +350,8 @@ class Game {
             this.pipes.push(newPipePair);
             spawnY = newPipePair.holeY; // 使用管道空隙的位置
         } else {
-            // 如果只生成收集物，随机决定Y位置
-            spawnY = Math.random() * (CANVAS_HEIGHT - 200) + 100; // 避免太靠近屏幕边缘
+            // 如果只生成收集物，随机决定Y位置，确保不会与现有收集物重叠
+            spawnY = this.getValidCollectiblePosition(x, 100, CANVAS_HEIGHT - 100, 15);
             
             // 检查是否生成树枝障碍物（只在没有管道的情况下生成）
             if (Math.random() < branchSpawnChance) {
@@ -367,60 +367,85 @@ class Game {
                 if (Math.random() < secondCollectibleChance) {
                     // 随机决定在第一个收集物上方或下方
                     const isAbove = Math.random() < 0.5;
-                    const verticalDistance = Math.random() * 100 + 200; // 100-300像素的垂直距离
+                    let minDistance = MIN_COLLECTIBLE_DISTANCE + 50; // 确保最小距离比MIN_COLLECTIBLE_DISTANCE大
+                    let maxDistance = minDistance + 150; // 设置一个合理的最大距离范围
                     
+                    // 确定第二个收集物的Y坐标范围
+                    let minY, maxY;
                     if (isAbove) {
-                        secondSpawnY = Math.max(70, spawnY - verticalDistance); // 确保不超出屏幕顶部
+                        minY = 70;
+                        maxY = Math.max(minY, spawnY - minDistance);
                     } else {
-                        secondSpawnY = Math.min(CANVAS_HEIGHT - 70, spawnY + verticalDistance); // 确保不超出屏幕底部
+                        minY = spawnY + minDistance;
+                        maxY = CANVAS_HEIGHT - 70;
                     }
                     
-                    // 随机决定生成金币或道具
-                    if (Math.random() < 0.5) {
-                        // 生成金币
-                        const type = Math.random() < 0.3 ? 'gold' : 'silver';
-                        this.coins.push(new Coin(this, x + PIPE_WIDTH/2, secondSpawnY, type));
-                    } else {
-                        // 生成常规道具（不包括树枝和烟雾）
-                        const powerupTypes = ["shield", "magnet", "doubleScore"];
-                        const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-                        this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, secondSpawnY, type));
-                    }
-                    
-                    // 生成第三个收集物的逻辑
-                    if (secondSpawnY && Math.random() < thirdCollectibleChance) {
-                        // 确定第三个收集物的位置
-                        // 如果前两个是上下排列，那么第三个放在中间
-                        // 如果前两个是在同一高度，那么第三个放在不同高度
-                        let thirdSpawnY;
-                        
-                        if (Math.abs(spawnY - secondSpawnY) > 100) {
-                            // 前两个收集物距离较远，第三个放中间
-                            thirdSpawnY = (spawnY + secondSpawnY) / 2;
-                        } else {
-                            // 前两个收集物较近，第三个错开放置
-                            // 随机决定在最高的上方还是最低的下方
-                            const minY = Math.min(spawnY, secondSpawnY);
-                            const maxY = Math.max(spawnY, secondSpawnY);
-                            const placeAbove = Math.random() < 0.5;
-                            
-                            if (placeAbove) {
-                                thirdSpawnY = Math.max(50, minY - (Math.random() * 80 + 70)); // 放在上方
-                            } else {
-                                thirdSpawnY = Math.min(CANVAS_HEIGHT - 50, maxY + (Math.random() * 80 + 70)); // 放在下方
-                            }
-                        }
+                    // 如果范围合理，则生成第二个收集物
+                    if (minY < maxY) {
+                        secondSpawnY = this.getValidCollectiblePosition(x, minY, maxY, 15);
                         
                         // 随机决定生成金币或道具
                         if (Math.random() < 0.5) {
                             // 生成金币
                             const type = Math.random() < 0.3 ? 'gold' : 'silver';
-                            this.coins.push(new Coin(this, x + PIPE_WIDTH/2, thirdSpawnY, type));
+                            this.coins.push(new Coin(this, x + PIPE_WIDTH/2, secondSpawnY, type));
                         } else {
                             // 生成常规道具（不包括树枝和烟雾）
                             const powerupTypes = ["shield", "magnet", "doubleScore"];
                             const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
-                            this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, thirdSpawnY, type));
+                            this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, secondSpawnY, type));
+                        }
+                        
+                        // 生成第三个收集物的逻辑
+                        if (secondSpawnY && Math.random() < thirdCollectibleChance) {
+                            // 确定第三个收集物的位置
+                            // 如果前两个是上下排列，那么第三个放在中间
+                            // 如果前两个是在同一高度，那么第三个放在不同高度
+                            let thirdSpawnY;
+                            let minY, maxY;
+                            
+                            if (Math.abs(spawnY - secondSpawnY) > minDistance * 2) {
+                                // 前两个收集物距离足够远，第三个放中间
+                                minY = Math.min(spawnY, secondSpawnY) + minDistance;
+                                maxY = Math.max(spawnY, secondSpawnY) - minDistance;
+                                
+                                if (minY < maxY) {
+                                    thirdSpawnY = this.getValidCollectiblePosition(x, minY, maxY, 15);
+                                }
+                            } else {
+                                // 前两个收集物较近，第三个错开放置
+                                // 找出最高和最低点
+                                const minExistingY = Math.min(spawnY, secondSpawnY);
+                                const maxExistingY = Math.max(spawnY, secondSpawnY);
+                                
+                                // 随机决定放在上方还是下方
+                                const placeAbove = Math.random() < 0.5;
+                                
+                                if (placeAbove && minExistingY - minDistance > 70) {
+                                    minY = 70;
+                                    maxY = minExistingY - minDistance;
+                                    thirdSpawnY = this.getValidCollectiblePosition(x, minY, maxY, 15);
+                                } else if (!placeAbove && maxExistingY + minDistance < CANVAS_HEIGHT - 70) {
+                                    minY = maxExistingY + minDistance;
+                                    maxY = CANVAS_HEIGHT - 70;
+                                    thirdSpawnY = this.getValidCollectiblePosition(x, minY, maxY, 15);
+                                }
+                            }
+                            
+                            // 如果找到合适的位置，生成第三个收集物
+                            if (thirdSpawnY) {
+                                // 随机决定生成金币或道具
+                                if (Math.random() < 0.5) {
+                                    // 生成金币
+                                    const type = Math.random() < 0.3 ? 'gold' : 'silver';
+                                    this.coins.push(new Coin(this, x + PIPE_WIDTH/2, thirdSpawnY, type));
+                                } else {
+                                    // 生成常规道具（不包括树枝和烟雾）
+                                    const powerupTypes = ["shield", "magnet", "doubleScore"];
+                                    const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
+                                    this.powerUps.push(new PowerUp(this, x + PIPE_WIDTH/2, thirdSpawnY, type));
+                                }
+                            }
                         }
                     }
                 }
@@ -428,12 +453,12 @@ class Game {
         }
 
         // 优先判断是否生成金币
-        if (Math.random() < COIN_SPAWN_CHANCE || onlySpawnCollectible) {
+        if ((Math.random() < COIN_SPAWN_CHANCE || onlySpawnCollectible) && !this.isCollectibleTooClose(x + PIPE_WIDTH/2, spawnY)) {
             const type = Math.random() < 0.3 ? 'gold' : 'silver';
             this.coins.push(new Coin(this, x + PIPE_WIDTH/2, spawnY, type));
         }
         // 如果没有生成金币，则考虑生成道具
-        else if (Math.random() < POWERUP_SPAWN_CHANCE || onlySpawnCollectible) {
+        else if ((Math.random() < POWERUP_SPAWN_CHANCE || onlySpawnCollectible) && !this.isCollectibleTooClose(x + PIPE_WIDTH/2, spawnY)) {
             // 只生成常规道具，不包括树枝和烟雾（它们已在上面专门处理）
             const powerupTypes = ["shield", "magnet", "doubleScore"];
             const type = powerupTypes[Math.floor(Math.random() * powerupTypes.length)];
@@ -829,6 +854,52 @@ class Game {
         }
         
         return false;
+    }
+
+    /**
+     * 检查新的收集物位置是否与现有收集物过近
+     * @param {number} x - 新收集物的x坐标
+     * @param {number} y - 新收集物的y坐标
+     * @returns {boolean} - 如果与现有收集物距离过近返回true，否则返回false
+     */
+    isCollectibleTooClose(x, y) {
+        // 检查与现有金币的距离
+        for (const coin of this.coins) {
+            const distance = Math.sqrt(Math.pow(x - coin.x, 2) + Math.pow(y - coin.y, 2));
+            if (distance < MIN_COLLECTIBLE_DISTANCE) {
+                return true;
+            }
+        }
+        
+        // 检查与现有道具的距离
+        for (const powerUp of this.powerUps) {
+            const distance = Math.sqrt(Math.pow(x - powerUp.x, 2) + Math.pow(y - powerUp.y, 2));
+            if (distance < MIN_COLLECTIBLE_DISTANCE) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 获取一个与现有收集物不重叠的随机Y坐标
+     * @param {number} x - 收集物的X坐标
+     * @param {number} minY - 允许的最小Y坐标
+     * @param {number} maxY - 允许的最大Y坐标
+     * @param {number} maxAttempts - 最大尝试次数
+     * @returns {number} 一个合适的Y坐标
+     */
+    getValidCollectiblePosition(x, minY, maxY, maxAttempts = 10) {
+        let attempts = 0;
+        let y;
+        
+        do {
+            y = Math.random() * (maxY - minY) + minY;
+            attempts++;
+        } while (this.isCollectibleTooClose(x, y) && attempts < maxAttempts);
+        
+        return y;
     }
 }
 
