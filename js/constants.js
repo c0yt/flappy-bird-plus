@@ -39,6 +39,9 @@ const SMOKE_SIZE = 50;             // 烟雾道具的大小
 const BRANCH_SPAWN_CHANCE = 0.15;  // 树枝生成基础概率（15%）
 const SMOKE_SPAWN_CHANCE = 0.15;   // 烟雾生成基础概率（15%）
 
+// 收集物间距设置
+const MIN_COLLECTIBLE_DISTANCE = 70;  // 收集物之间的最小距离，防止重叠
+
 // 收集物生成概率设置（默认值，会被难度设置中的值覆盖）
 const COLLECTIBLE_ONLY_CHANCE = 0.3;      // 只生成收集物而不生成管道的概率（30%）
 const SECOND_COLLECTIBLE_CHANCE = 0.6;    // 生成第二个收集物的概率（60%）
@@ -51,7 +54,7 @@ const DIFFICULTIES = {
         pipeSpeed: 1.0,              // 管道移动速度较慢
         //pipeVerticalMove: 0,         // 管道不会上下移动
         //pipeHorizontalGap: 250,      // 管道之间的水平间距较大
-        pipeVerticalGapMin: 140,     // 管道垂直间隙最小值
+        pipeVerticalGapMin: 120,     // 管道垂直间隙最小值
         pipeVerticalGapMax: 180,     // 管道垂直间隙最大值
         birdFlapPower: -5.5,         // 跳跃力度较大，更容易控制
         gravity: 0.22,               // 重力较小
@@ -62,7 +65,7 @@ const DIFFICULTIES = {
         secondCollectibleChance: 0.7,    // 简单模式下70%概率生成第二个收集物
         thirdCollectibleChance: 0.4,     // 简单模式下40%概率生成第三个收集物
         branchSpawnChance: 0.05,         // 简单模式下5%概率生成树枝障碍物
-        smokeSpawnChance: 0.10,          // 简单模式下5%概率生成烟雾道具
+        smokeSpawnChance:0.05,          // 简单模式下5%概率生成烟雾道具
     },
     // 普通难度 - 适合熟练玩家
     normal: {

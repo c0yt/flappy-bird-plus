@@ -319,3 +319,74 @@ body {
 
 /* Add more specific styles for bird, pipes, coins, powerups later */
 
+#over-image {
+    max-width: 320px;
+    width: 90%;
+    height: auto;
+    animation: float 1.5s ease-in-out infinite;
+    margin: 0 auto 10px auto;
+    display: block;
+}
+
+#score-display {
+    margin: 15px 0;
+    text-align: center;
+}
+
+#score-display p {
+    font-size: 1em;
+    margin-bottom: 8px;
+    color: #fff;
+    text-shadow: 1px 1px #000;
+    animation: floatText 2s ease-in-out infinite;
+}
+
+#game-over-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.game-over-btn-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#restart-game-btn.image-btn,
+#main-menu-btn.image-btn {
+    width: 70px;
+    height: 48px;
+    margin-bottom: 8px;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    filter: brightness(0.85);
+    animation: startBtnFloat 3s ease-in-out infinite;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 0 !important;
+}
+
+.btn-label {
+    font-size: 1em;
+    color: #e65c00;
+    text-shadow: 1px 1px #fff, 2px 2px #000;
+    font-family: inherit;
+    letter-spacing: 2px;
+    user-select: none;
+}
+
+#main-menu-btn.image-btn {
+    background-image: url('../assets/home.png') !important;
+}
+#restart-game-btn.image-btn {
+    background-image: url('../assets/restart.png') !important;
+}
+
