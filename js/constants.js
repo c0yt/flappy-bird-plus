@@ -64,21 +64,18 @@ const DIFFICULTIES = {
         collectibleOnlyChance: 0.3,      // 简单模式下30%概率只生成收集物
         secondCollectibleChance: 0.7,    // 简单模式下70%概率生成第二个收集物
         thirdCollectibleChance: 0.4,     // 简单模式下40%概率生成第三个收集物
-        branchSpawnChance: 0.05,         // 简单模式下5%概率生成树枝障碍物
-        smokeSpawnChance:0.05,          // 简单模式下5%概率生成烟雾道具
+        branchSpawnChance: 0.10,         // 简单模式下10%概率生成树枝障碍物
+        smokeSpawnChance:0.10,          // 简单模式下10%概率生成烟雾道具
     },
     // 普通难度 - 适合熟练玩家
     normal: {
-        pipeSpeed: 1.5,              // 中等管道速度
-        //pipeVerticalMove: 0.5,       // 管道会缓慢上下移动
-        //pipeVerticalMoveSpeed: 0.01, // 管道垂直移动速度
-       // pipeHorizontalGap: 200,      // 中等管道间距
-        pipeVerticalGapMin: PIPE_HOLE_MIN,
-        pipeVerticalGapMax: PIPE_HOLE_MAX,
-        birdFlapPower: BIRD_FLAP_POWER,
-        gravity: GRAVITY,
-        pipeSpawnIntervalMin: PIPE_SPAWN_INTERVAL_MIN,
-        pipeSpawnIntervalMax: PIPE_SPAWN_INTERVAL_MAX,
+        pipeSpeed: 1.2,              // 中等管道速度
+        pipeVerticalGapMin: 110,
+        pipeVerticalGapMax: 170,
+        birdFlapPower: -5.0,
+        gravity: 0.25,
+        pipeSpawnIntervalMin: 2000,
+        pipeSpawnIntervalMax: 3000,
         initialPipeDelay: 100,      // 开局等待0.1秒再生成管道
         collectibleOnlyChance: 0.3,      // 普通模式下30%概率只生成收集物
         secondCollectibleChance: 0.6,    // 普通模式下60%概率生成第二个收集物
@@ -88,16 +85,13 @@ const DIFFICULTIES = {
     },
     // 困难难度 - 适合挑战玩家
     hard: {
-        pipeSpeed: 1.8,              // 管道移动速度快
-        //pipeVerticalMove: 1.0,       // 管道上下移动幅度大
-        //pipeVerticalMoveSpeed: 0.02, // 管道垂直移动速度快
-        //pipeHorizontalGap: 250,      // 管道间距较小
-        pipeVerticalGapMin: 90,      // 管道垂直间隙小
-        pipeVerticalGapMax: 120,
+        pipeSpeed: 1.4,              // 管道移动速度快
+        pipeVerticalGapMin: 100,      // 管道垂直间隙小
+        pipeVerticalGapMax: 150,
         birdFlapPower: -4.5,         // 跳跃力度小，难以控制
         gravity: 0.28,               // 重力大
-        pipeSpawnIntervalMin: 1000,  // 管道生成间隔短
-        pipeSpawnIntervalMax: 2000,
+        pipeSpawnIntervalMin: 1800,  // 管道生成间隔短
+        pipeSpawnIntervalMax: 2800,
         initialPipeDelay: 100,      // 开局等待0.1秒再生成管道
         collectibleOnlyChance: 0.3,      // 困难模式下30%概率只生成收集物
         secondCollectibleChance: 0.7,    // 困难模式下70%概率生成第二个收集物
