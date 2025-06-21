@@ -148,7 +148,9 @@ class PowerUp {
                 this.game.activateDoubleScore(this.duration);
                 break;
             case 'branch': // 树枝障碍物，碰到后游戏结束
-                this.game.gameOver();
+                if (!this.game.bird.isShieldActive) {
+                    this.game.gameOver();
+                }
                 break;
             case 'smoke': // 烟雾道具，碰到后增加视野遮挡效果
                 this.game.activateSmoke(this.duration);

@@ -69,7 +69,7 @@ const DIFFICULTIES = {
     },
     // 普通难度 - 适合熟练玩家
     normal: {
-        pipeSpeed: 1.2,              // 中等管道速度
+        pipeSpeed: 1.3,              // 中等管道速度
         pipeVerticalGapMin: 110,
         pipeVerticalGapMax: 170,
         birdFlapPower: -5.0,
@@ -85,7 +85,7 @@ const DIFFICULTIES = {
     },
     // 困难难度 - 适合挑战玩家
     hard: {
-        pipeSpeed: 1.4,              // 管道移动速度快
+        pipeSpeed: 1.6,              // 管道移动速度快
         pipeVerticalGapMin: 100,      // 管道垂直间隙小
         pipeVerticalGapMax: 150,
         birdFlapPower: -4.5,         // 跳跃力度小，难以控制
