@@ -1,11 +1,5 @@
 // js/collision.js - 碰撞检测工具文件
 
-/**
- * 检查两个矩形是否发生碰撞
- * @param {Object} rect1 - 第一个矩形对象，包含 x, y, width, height
- * @param {Object} rect2 - 第二个矩形对象，包含 x, y, width, height
- * @returns {boolean} - 如果发生碰撞返回true，否则返回false
- */
 function checkCollision(rect1, rect2) {
     // 使用AABB（轴对齐包围盒）碰撞检测算法
     // 当两个矩形在x轴和y轴上都有重叠时，判定为发生碰撞
