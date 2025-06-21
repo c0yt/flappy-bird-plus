@@ -5,8 +5,8 @@ function checkCollision(rect1, rect2) {
     // 当两个矩形在x轴和y轴上都有重叠时，判定为发生碰撞
     if (rect1.x < rect2.x + rect2.width &&   // rect1的左边在rect2的右边的左侧
         rect1.x + rect1.width > rect2.x &&   // rect1的右边在rect2的左边的右侧
-        rect1.y < rect2.y + rect2.height &&  // rect1的上边在rect2的下边的上方
-        rect1.y + rect1.height > rect2.y) {  // rect1的下边在rect2的上边的下方
+        rect1.y < rect2.y + rect2.height &&  // rect1的上边在rect2的下边的上侧
+        rect1.y + rect1.height > rect2.y) {  // rect1的下边在rect2的上边的下侧
         return true; // 检测到碰撞
     }
     return false; // 没有碰撞
